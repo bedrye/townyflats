@@ -1,0 +1,24 @@
+name: TownyApartments
+version: '${project.version}'
+main: me.bedrye.townyflats.Townyflats
+api-version: 1.16
+authors: [ Bedrye ]
+description: Flats for towny!
+depend: [Towny]
+commands:
+  tapp:
+    description: PIZDEC
+    usage: /<command>
+
+permissions:
+  townyappartaments.*:
+    description: Gives access to all commands
+    default: op
+    children:
+      townyappartaments.claim: true
+      townyappartaments.delete: true
+  townyappartaments.claim:
+    description: Allows the creation of plots
+  townyappartaments.delete:
+    description: Allows the deletion of plots
+
