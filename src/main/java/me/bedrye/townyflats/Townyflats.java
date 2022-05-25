@@ -16,10 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 public final class Townyflats extends JavaPlugin {
-    public Map<String, String[]> cache = new HashMap<String, String[]>();
-    public Map<String, Chunk> cacheCh = new HashMap<String, Chunk>();
+    public Map<String, Apartment> cache = new HashMap<String, Apartment>();
     public static Economy econ = null;
-    String a;
     FileConfiguration config = getConfig();
     public int flatlim;
 
@@ -40,7 +38,7 @@ public final class Townyflats extends JavaPlugin {
             this.price = price;
             this.owner =owner;
         }
-        /*void setX1(int pos){
+        void setX1(int pos){
             x1= pos;
         }
         void setX2(int pos){
@@ -69,7 +67,7 @@ public final class Townyflats extends JavaPlugin {
         }
         void setOwner(String pos){
             owner = pos;
-        }*/
+        }
 
 
     }

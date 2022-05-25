@@ -74,7 +74,7 @@ public class Commands implements CommandExecutor {
     }
     private void Claim(Player pl,Resident res){
         if (townyflats.cache.containsKey(pl.getUniqueId().toString())) {
-            if (!townyflats.cache.get(pl.getUniqueId().toString())[1].equals("-100") && !townyflats.cache.get(pl.getUniqueId().toString())[4].equals("-100")) {
+            if (townyflats.cache.get(pl.getUniqueId().toString()).y1 !=-100 && townyflats.cache.get(pl.getUniqueId().toString()).y2!=-100) {
                 if (ChunkTestor(pl,res.getTownOrNull())){
                 int g = 0;
                 if (townyflats.flats.containsKey(res.getTownOrNull())) {
@@ -88,24 +88,14 @@ public class Commands implements CommandExecutor {
                         changer[i] = townyflats.flats.get(res.getTownOrNull())[i];
                     }
                 }
-                    changer[g-1] = new Townyflats.Apartment(
-                            Integer.parseInt(townyflats.cache.get(pl.getUniqueId().toString())[0])
-                            ,Integer.parseInt(townyflats.cache.get(pl.getUniqueId().toString())[3])
-                            ,Integer.parseInt(townyflats.cache.get(pl.getUniqueId().toString())[1])
-                            ,Integer.parseInt(townyflats.cache.get(pl.getUniqueId().toString())[4])
-                            ,Integer.parseInt(townyflats.cache.get(pl.getUniqueId().toString())[2])
-                            ,Integer.parseInt(townyflats.cache.get(pl.getUniqueId().toString())[5])
-                            ,townyflats.cacheCh.get(pl.getUniqueId().toString()).getX()
-                            ,townyflats.cacheCh.get(pl.getUniqueId().toString()).getZ(),-1,""+pl.getUniqueId());
+                    changer[g-1] = townyflats.cache.get(pl.getUniqueId().toString());
                 townyflats.flats.put(res.getTownOrNull(), changer);
                 pl.sendMessage(tapp+"You have claimed this property");
             }
                 townyflats.cache.remove(pl.getUniqueId().toString());
-                townyflats.cacheCh.remove(pl.getUniqueId().toString());
             }
 
         }
-
     }
     private void Buy(Player pl){
         Town town;
@@ -144,7 +134,7 @@ public class Commands implements CommandExecutor {
                 Resident res = TownyUniverse.getInstance().getResident(pl.getName());
                 f = true;
                 if(CityTestor(pl,town)){
-                        if ((townyflats.flats.get(town)[8+former].equals(pl.getUniqueId().toString())) || (res.isMayor())) {
+                        if ((townyflats.flats.get(town)[former].owner.equals(pl.getUniqueId().toString())) || (res.isMayor())) {
                             f = false;
                                     pl.sendMessage( tapp +" You have just put up this property for sale");
                             townyflats.flats.get(town)[former].price = Integer.parseInt(price);
@@ -221,7 +211,7 @@ public class Commands implements CommandExecutor {
         if (townyflats.flats.containsKey(town) ){
         lengTh = townyflats.flats.get(town).length;
         for (int i = 0; i < lengTh; i += 1) {
-            if (townyflats.flats.get(town)[i].xC == townyflats.cacheCh.get(pl.getUniqueId().toString()).getX() && townyflats.flats.get(town)[i].zC == townyflats.cacheCh.get(pl.getUniqueId().toString()).getZ()) {
+            if (townyflats.flats.get(town)[i].xC == townyflats.cache.get(pl.getUniqueId().toString()).xC && townyflats.flats.get(town)[i].zC == townyflats.cache.get(pl.getUniqueId().toString()).zC) {
                 if (i+1 == townyflats.flatlim) {
                     pl.sendMessage(tapp + "You have reached the limit for this chunk");
                     return false;

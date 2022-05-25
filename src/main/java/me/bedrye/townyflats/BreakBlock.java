@@ -2,7 +2,6 @@ package me.bedrye.townyflats;
 
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.TownyUniverse;
-import com.palmergames.bukkit.towny.event.PreDeleteTownEvent;
 import com.palmergames.bukkit.towny.event.actions.*;
 import com.palmergames.bukkit.towny.event.town.TownPreUnclaimEvent;
 import com.palmergames.bukkit.towny.object.Resident;
@@ -32,9 +31,7 @@ public class BreakBlock implements Listener {
 
     private final String tapp = "§L§0[§4TAPP§L§0]§f";
     String b = "STICK";
-    int x1, y1, z1;
     boolean f;
-    String[] cacheL = {"0", "-100", "0", "0", "-100", "0", "-100", "-100", "che"};
     ArrayList<UUID> haveCooldowns = new ArrayList<UUID>();
     //Block break/placement/usage events
 
@@ -59,13 +56,13 @@ public class BreakBlock implements Listener {
                 Resident res = TownyUniverse.getInstance().getResident(pl.getName());
                 if (!res.isMayor()) {
         if (townyflats.flats.containsKey(town)) {
-
+            int x1, y1, z1;
             int lengTh = townyflats.flats.get(town).length;
             x1 = selecedBl1.getLocation().getBlockX();
             y1 = selecedBl1.getLocation().getBlockY();
             z1 = selecedBl1.getLocation().getBlockZ();
             for (int i = 0; i < lengTh; i += 1) {
-                if (CheckIfBlInCity(i, town, res)||res.isMayor()) {
+                if (CheckIfBlInCity(i, town, x1,y1, z1)||res.isMayor()) {
                     Resident ress = TownyUniverse.getInstance().getResident(Bukkit.getOfflinePlayer(UUID.fromString(townyflats.flats.get(town)[i].owner)).getName());
                     if ((townyflats.flats.get(town)[i].owner.equals(pl.getUniqueId().toString())) || (res.isMayor())||(ress.hasFriend(res))) {
 
@@ -79,46 +76,47 @@ public class BreakBlock implements Listener {
         }
     }}}}
     //wand
-    private void Privatev1(Player pl, Block selecedBl1, boolean testor) {
-        if (townyflats.cacheCh.get(pl.getUniqueId().toString()) == selecedBl1.getLocation().getChunk() || townyflats.cacheCh.get(pl.getUniqueId().toString()) == null) {
-            townyflats.cacheCh.put(pl.getUniqueId().toString(), selecedBl1.getLocation().getChunk());
+    private void Privatev1(Player pl, Block selecedBl1, boolean testor,int x1,int y1,int z1) {
+        if (townyflats.cache.containsKey(pl.getUniqueId().toString())){
+        if(!(townyflats.cache.get(pl.getUniqueId().toString()).xC == selecedBl1.getLocation().getChunk().getX() && townyflats.cache.get(pl.getUniqueId().toString()).zC == selecedBl1.getLocation().getChunk().getZ())) {
+            townyflats.cache.remove(pl.getUniqueId().toString());
+            pl.sendMessage(tapp + " Your new position is on the other chunk.All selected positions have been cleared");
 
+        return;
+        }}
+            Townyflats.Apartment cacheL = new Townyflats.Apartment(0, 0, -100, -100, 0, 0,-100,-100, -1, pl.getUniqueId().toString());
             if (testor) {
-                cacheL[0] = "" + x1;
-                cacheL[1] = "" + y1;
-                cacheL[2] = "" + z1;
+
+                cacheL.x1 = x1;
+                cacheL.y1 = y1;
+                cacheL.z1 = z1;
                 if (townyflats.cache.containsKey(pl.getUniqueId().toString())) {
-                    cacheL[3] = townyflats.cache.get(pl.getUniqueId().toString())[3];
-                    cacheL[4] = townyflats.cache.get(pl.getUniqueId().toString())[4];
-                    cacheL[5] = townyflats.cache.get(pl.getUniqueId().toString())[5];
+                    cacheL.x2 = townyflats.cache.get(pl.getUniqueId().toString()).x2;
+                    cacheL.y2 = townyflats.cache.get(pl.getUniqueId().toString()).y2;
+                    cacheL.z2 = townyflats.cache.get(pl.getUniqueId().toString()).z2;
                 }
-                pl.sendMessage(tapp + " pos 1(x: " + x1 + "y: " + y1 + "z: " + z1 + ")");
+                pl.sendMessage(tapp + " pos 1 (x: " + x1 + "; y: " + y1 + "; z: " + z1 + ")");
             } else {
 
-                cacheL[3] = "" + x1;
-                cacheL[4] = "" + y1;
-                cacheL[5] = "" + z1;
+                cacheL.x2 = x1;
+                cacheL.y2 = y1;
+                cacheL.z2 = z1;
                 if (townyflats.cache.containsKey(pl.getUniqueId().toString())) {
-                    cacheL[0] = townyflats.cache.get(pl.getUniqueId().toString())[0];
-                    cacheL[1] = townyflats.cache.get(pl.getUniqueId().toString())[1];
-                    cacheL[2] = townyflats.cache.get(pl.getUniqueId().toString())[2];
+                    cacheL.x1 = townyflats.cache.get(pl.getUniqueId().toString()).x1;
+                    cacheL.y1 = townyflats.cache.get(pl.getUniqueId().toString()).y1;
+                    cacheL.z1 = townyflats.cache.get(pl.getUniqueId().toString()).z1;
                 }
-                pl.sendMessage(tapp + " pos 2(x: " + x1 + "y: " + y1 + "z: " + z1 + ")");
+                pl.sendMessage(tapp + " pos 2 (x: " + x1 + "; y: " + y1 + "; z: " + z1 + ")");
             }
+        cacheL.zC = selecedBl1.getChunk().getZ();
+        cacheL.xC = selecedBl1.getChunk().getX();
+        townyflats.cache.put(pl.getUniqueId().toString(), cacheL);
 
             pl.getLocation().getWorld().playSound(pl.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1, 2);
-        } else {
-            pl.sendMessage(tapp + " Your new position is on the other chunk.All selected positions have been cleared");
-            townyflats.cacheCh.put(pl.getUniqueId().toString(), selecedBl1.getLocation().getChunk());
-            cacheL[3] = "0";
-            cacheL[4] = "-100";
-            cacheL[5] = "0";
-            cacheL[0] = "0";
-            cacheL[1] = "-100";
-            cacheL[2] = "0";
         }
-        townyflats.cache.put(pl.getUniqueId().toString(), cacheL);
-    }
+
+
+
 
 
 
@@ -150,13 +148,14 @@ public class BreakBlock implements Listener {
                                 }
                             }, 40L);
                             f = true;
+                            int x1, y1, z1;
                             x1 = selecedBl1.getLocation().getBlockX();
                             y1 = selecedBl1.getLocation().getBlockY();
                             z1 = selecedBl1.getLocation().getBlockZ();
                             if (townyflats.flats.containsKey(town)) {
                                 int lengTh = townyflats.flats.get(town).length;
                                 for (int i = 0; i < lengTh; i += 1) {
-                                    if (CheckIfBlInCity(i,town,res)) {
+                                    if (CheckIfBlInCity(i,town,x1,y1, z1)) {
                                         pl.sendMessage(tapp + "There is already an apartment here");
                                         y1 = -100;
                                         f = false;
@@ -166,9 +165,9 @@ public class BreakBlock implements Listener {
                             }
                             if (f) {
                                 if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-                                    Privatev1(pl, selecedBl1, false);
+                                    Privatev1(pl, selecedBl1, false,x1,y1, z1);
                                 } else if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
-                                    Privatev1(pl, selecedBl1, true);
+                                    Privatev1(pl, selecedBl1, true,x1,y1, z1);
 
                                 }
 
@@ -188,7 +187,7 @@ public class BreakBlock implements Listener {
     public void playerLeave(PlayerQuitEvent event) {
         if (townyflats.cache.containsKey(event.getPlayer().getUniqueId().toString())) {
             townyflats.cache.remove(event.getPlayer().getUniqueId().toString());
-            townyflats.cacheCh.remove(event.getPlayer().getUniqueId().toString());
+            //townyflats.cacheCh.remove(event.getPlayer().getUniqueId().toString());
         }
     }
     //Deleting the info on town/chunk deletion;
@@ -241,16 +240,13 @@ public class BreakBlock implements Listener {
     //}
 
     //something important
-    private boolean CheckIfBlInCity(int i,Town town,Resident res) {
-        if (((x1 >= townyflats.flats.get(town)[i].x1 && x1 <= townyflats.flats.get(town)[i].x2)
+    private boolean CheckIfBlInCity(int i,Town town,int x1,int y1,int z1) {
+        return ((x1 >= townyflats.flats.get(town)[i].x1 && x1 <= townyflats.flats.get(town)[i].x2)
                 || (x1 <= townyflats.flats.get(town)[i].x1 && x1 >= townyflats.flats.get(town)[i].x2))
-                && ((y1 >= townyflats.flats.get(town)[i].y1 && y1 <=townyflats.flats.get(town)[i].y2)
+                && ((y1 >= townyflats.flats.get(town)[i].y1 && y1 <= townyflats.flats.get(town)[i].y2)
                 || (y1 <= townyflats.flats.get(town)[i].y1 && y1 >= townyflats.flats.get(town)[i].y2))
                 && ((z1 >= townyflats.flats.get(town)[i].z1 && z1 <= townyflats.flats.get(town)[i].z2)
-                || (z1 <= townyflats.flats.get(town)[i].z1 && z1 >= townyflats.flats.get(town)[i].z2))
-        )
-        {return true;}
-        else {return  false;}
+                || (z1 <= townyflats.flats.get(town)[i].z1 && z1 >= townyflats.flats.get(town)[i].z2));
 
     }
 }
