@@ -151,21 +151,25 @@ public class Commands implements CommandExecutor {
         if (!TownyAPI.getInstance().isWilderness(pl.getLocation())) {
             town = TownyAPI.getInstance().getTownBlock(pl.getLocation()).getTownOrNull();
             if (townyflats.flats.containsKey(town)&&CityTestor(pl,town)) {
-                    if (lengTh == 0) {
+                    if (lengTh == 1) {
                         townyflats.flats.remove(town);
                         pl.sendMessage(tapp + "You have deleted this property");
                     } else {
                         Townyflats.Apartment[] copy = new Townyflats.Apartment[lengTh - 1];
+                        int k=0;
                         for (int i = 0; i < lengTh; i++) {
                             if (i != former) {
-                                copy[i] = townyflats.flats.get(town)[i];
+                                copy[k] = townyflats.flats.get(town)[i];
+                                k++;
+                                pl.sendMessage(tapp+townyflats.flats.get(town)[i].x2);
 
                             } else {
                                 pl.sendMessage(tapp + "You have deleted this property");
                             }
-                            townyflats.flats.put(town,copy);
+
 
                         }
+                        townyflats.flats.put(town,copy);
                     }
                 }
             }
