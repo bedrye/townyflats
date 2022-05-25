@@ -40,7 +40,7 @@ public final class Townyflats extends JavaPlugin {
             this.price = price;
             this.owner =owner;
         }
-        void setX1(int pos){
+        /*void setX1(int pos){
             x1= pos;
         }
         void setX2(int pos){
@@ -69,7 +69,8 @@ public final class Townyflats extends JavaPlugin {
         }
         void setOwner(String pos){
             owner = pos;
-        }
+        }*/
+
 
     }
 
