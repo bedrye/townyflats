@@ -11,6 +11,7 @@ import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.Resident;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 public class Commands implements CommandExecutor {
@@ -20,7 +21,6 @@ public class Commands implements CommandExecutor {
     private int lengTh;
     public Commands(Townyflats townyflats){
         this.townyflats = townyflats;
-
 }
 
     @Override
@@ -48,7 +48,9 @@ public class Commands implements CommandExecutor {
                         break;
                     case "sell":
                         if (args.length==2) {
-                            Sell(pl, args[1]);
+                            if (Integer.parseInt(args[1])>=0) {
+                                Sell(pl, args[1]);
+                            }else {pl.sendMessage(tapp + "Write a valid cost");}
                         } else {
                             pl.sendMessage(tapp + "/tapp sell COST");
                         }
@@ -76,27 +78,17 @@ public class Commands implements CommandExecutor {
         if (townyflats.cache.containsKey(pl.getUniqueId().toString())) {
             if (townyflats.cache.get(pl.getUniqueId().toString()).y1 !=-100 && townyflats.cache.get(pl.getUniqueId().toString()).y2!=-100) {
                 if (ChunkTestor(pl,res.getTownOrNull())){
-                int g = 0;
-                if (townyflats.flats.containsKey(res.getTownOrNull())) {
-                    g = townyflats.flats.get(res.getTownOrNull()).length;
-                }
-                Townyflats.Apartment[] changer = new Townyflats.Apartment[g + 1];
-                g = changer.length;
-
-                if (townyflats.flats.containsKey(res.getTownOrNull())) {
-                    for (int i = 0; i < g-1; i++) {
-                        changer[i] = townyflats.flats.get(res.getTownOrNull())[i];
+                    if (!townyflats.flats.containsKey(res.getTownOrNull())) {
+                        townyflats.flats.put(res.getTownOrNull(),new ArrayList<>());
                     }
-                }
-                    changer[g-1] = townyflats.cache.get(pl.getUniqueId().toString());
-                townyflats.flats.put(res.getTownOrNull(), changer);
-                pl.sendMessage(tapp+"You have claimed this property");
-            }
+                    townyflats.flats.get(res.getTownOrNull()).add(townyflats.cache.get(pl.getUniqueId().toString()));
+                    pl.sendMessage(tapp+"You have claimed this property");
+            }}
                 townyflats.cache.remove(pl.getUniqueId().toString());
             }
 
         }
-    }
+
     private void Buy(Player pl){
         Town town;
         boolean f;
@@ -106,15 +98,10 @@ public class Commands implements CommandExecutor {
             if (townyflats.flats.containsKey(town)) {
                 f = true;
                     if (CityTestor(pl,town)) {
-                        int h =townyflats.flats.get(town)[former].price;
-                        if (( h!= -1 )&&(townyflats.econ.getBalance(pl) >= townyflats.flats.get(town)[former].price)) {
+                        int h =townyflats.flats.get(town).get(former).price;
+                        if (( h>=0 )&&(townyflats.econ.getBalance(pl) >= townyflats.flats.get(town).get(former).price)) {
                             f = false;
-                            townyflats.econ.withdrawPlayer(pl,townyflats.flats.get(town)[former].price );
-                            OfflinePlayer owner = Bukkit.getOfflinePlayer(UUID.fromString(townyflats.flats.get(town)[former].owner));
-                            townyflats.econ.depositPlayer(owner,townyflats.flats.get(town)[former].price );
-                            townyflats.flats.get(town)[former].owner = ""+pl.getUniqueId();
-                            pl.sendMessage(tapp+"You have bought this property for "+townyflats.flats.get(town)[former].price + ".");
-                            townyflats.flats.get(town)[former].price = -1;
+                            townyflats.flats.get(town).get(former).BuyPlot(pl);
                         }
 
 
@@ -134,10 +121,14 @@ public class Commands implements CommandExecutor {
                 Resident res = TownyUniverse.getInstance().getResident(pl.getName());
                 f = true;
                 if(CityTestor(pl,town)){
-                        if ((townyflats.flats.get(town)[former].owner.equals(pl.getUniqueId().toString())) || (res.isMayor())) {
+                        if ((townyflats.flats.get(town).get(former).owner.equals(pl.getUniqueId().toString())) || (res.isMayor())) {
                             f = false;
                                     pl.sendMessage( tapp +" You have just put up this property for sale");
-                            townyflats.flats.get(town)[former].price = Integer.parseInt(price);
+                            townyflats.flats.get(town).get(former).price = Integer.parseInt(price);
+                            if ( townyflats.flats.get(town).get(former).yA!=-100) {
+                                townyflats.flats.get(town).get(former).RemoveHologram();
+                            }
+                            townyflats.flats.get(town).get(former).SetHologram(pl.getLocation());
                         }
                 }
                 if (f) {
@@ -152,25 +143,20 @@ public class Commands implements CommandExecutor {
             town = TownyAPI.getInstance().getTownBlock(pl.getLocation()).getTownOrNull();
             if (townyflats.flats.containsKey(town)&&CityTestor(pl,town)) {
                     if (lengTh == 1) {
+
+                            townyflats.flats.get(town).get(0).RemoveHologram();
+
                         townyflats.flats.remove(town);
                         pl.sendMessage(tapp + "You have deleted this property");
+
                     } else {
-                        Townyflats.Apartment[] copy = new Townyflats.Apartment[lengTh - 1];
-                        int k=0;
-                        for (int i = 0; i < lengTh; i++) {
-                            if (i != former) {
-                                copy[k] = townyflats.flats.get(town)[i];
-                                k++;
-                                pl.sendMessage(tapp+townyflats.flats.get(town)[i].x2);
+                        townyflats.flats.get(town).get(former).RemoveHologram();
 
-                            } else {
+                        townyflats.flats.get(town).remove(former);
                                 pl.sendMessage(tapp + "You have deleted this property");
-                            }
 
-
-                        }
-                        townyflats.flats.put(town,copy);
                     }
+
                 }
             }
         else {pl.sendMessage(tapp+"Nothing to delete");}
@@ -181,10 +167,11 @@ public class Commands implements CommandExecutor {
             Town town = TownyAPI.getInstance().getTownBlock(pl.getLocation()).getTownOrNull();
             if (townyflats.flats.get(town)!=null) {
                 if (CityTestor(pl,town)) {
-                    pl.sendMessage(tapp + "§2Pos 1: §f(x:" + townyflats.flats.get(town)[former].x1 + ";y:" + townyflats.flats.get(town)[former].y1 + ";z:" + townyflats.flats.get(town)[former].z1 + "); \n" +
-                            "§2Pos 2: §f(x:" + townyflats.flats.get(town)[former].x1 + ";y:" + townyflats.flats.get(town)[former].y2 + ";z:" + townyflats.flats.get(town)[former].z2 + "); \n" +
-                            "§2Owner: §f" + Bukkit.getOfflinePlayer(UUID.fromString(townyflats.flats.get(town)[former].owner)).getName() + "; \n" +
-                            "§2For sale: §f" + townyflats.flats.get(town)[former].price + ";");
+                    pl.sendMessage(tapp + "§2Pos 1: §f(x:" + townyflats.flats.get(town).get(former).x1 + ";y:" + townyflats.flats.get(town).get(former).y1 + ";z:" + townyflats.flats.get(town).get(former).z1 + "); \n" +
+                            "§2Pos 2: §f(x:" + townyflats.flats.get(town).get(former).x1 + ";y:" + townyflats.flats.get(town).get(former).y2 + ";z:" + townyflats.flats.get(town).get(former).z2 + "); \n" +
+                            "§2Owner: §f" + Bukkit.getOfflinePlayer(UUID.fromString(townyflats.flats.get(town).get(former).owner)).getName() + "; \n" +
+                            "§2For sale: §f" + townyflats.flats.get(town).get(former).price + ";");
+
                 } else if(former>=lengTh-1) {
                     pl.sendMessage(tapp + "No property was found");
                 }
@@ -195,15 +182,10 @@ public class Commands implements CommandExecutor {
         }
     }
  private boolean CityTestor(Player pl,Town town){
-        lengTh = townyflats.flats.get(town).length;
+        lengTh = townyflats.flats.get(town).size();
         for (int i = 0; i < lengTh; i+=1) {
-        if ((((pl.getLocation().getBlockX() >= townyflats.flats.get(town)[i].x1 && pl.getLocation().getBlockX() <= townyflats.flats.get(town)[i].x2)
-        || (pl.getLocation().getBlockX() <= townyflats.flats.get(town)[i].x1 && pl.getLocation().getBlockX() >= townyflats.flats.get(town)[i].x2))
-        && ((pl.getLocation().getBlockY() >= townyflats.flats.get(town)[i].y1 && pl.getLocation().getBlockY() <= townyflats.flats.get(town)[i].y2)
-        || (pl.getLocation().getBlockY() <= townyflats.flats.get(town)[i].y1 && pl.getLocation().getBlockY() >= townyflats.flats.get(town)[i].y2))
-        && ((pl.getLocation().getBlockZ() >= townyflats.flats.get(town)[i].z1 && pl.getLocation().getBlockZ() <= townyflats.flats.get(town)[i].z2)
-        || (pl.getLocation().getBlockZ() <= townyflats.flats.get(town)[i].z1 && pl.getLocation().getBlockZ() >= townyflats.flats.get(town)[i].z2))
-        )) {
+        if (townyflats.flats.get(town).get(i).testIfInApartment(pl.getLocation()))
+        {
             former = i ;
             return true;
         }
@@ -213,9 +195,9 @@ public class Commands implements CommandExecutor {
 
     private boolean ChunkTestor(Player pl,Town town) {
         if (townyflats.flats.containsKey(town) ){
-        lengTh = townyflats.flats.get(town).length;
+        lengTh = townyflats.flats.get(town).size();
         for (int i = 0; i < lengTh; i += 1) {
-            if (townyflats.flats.get(town)[i].xC == townyflats.cache.get(pl.getUniqueId().toString()).xC && townyflats.flats.get(town)[i].zC == townyflats.cache.get(pl.getUniqueId().toString()).zC) {
+            if (townyflats.flats.get(town).get(i).xC == townyflats.cache.get(pl.getUniqueId().toString()).xC && townyflats.flats.get(town).get(i).zC == townyflats.cache.get(pl.getUniqueId().toString()).zC) {
                 if (i+1 == townyflats.flatlim) {
                     pl.sendMessage(tapp + "You have reached the limit for this chunk");
                     return false;

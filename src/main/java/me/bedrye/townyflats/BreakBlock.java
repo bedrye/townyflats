@@ -6,14 +6,19 @@ import com.palmergames.bukkit.towny.event.actions.*;
 import com.palmergames.bukkit.towny.event.town.TownPreUnclaimEvent;
 import com.palmergames.bukkit.towny.object.Resident;
 import org.bukkit.Bukkit;
+
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.entity.Player;
 import com.palmergames.bukkit.towny.object.Town;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -56,15 +61,11 @@ public class BreakBlock implements Listener {
                 Resident res = TownyUniverse.getInstance().getResident(pl.getName());
                 if (!res.isMayor()) {
         if (townyflats.flats.containsKey(town)) {
-            int x1, y1, z1;
-            int lengTh = townyflats.flats.get(town).length;
-            x1 = selecedBl1.getLocation().getBlockX();
-            y1 = selecedBl1.getLocation().getBlockY();
-            z1 = selecedBl1.getLocation().getBlockZ();
+            int lengTh = townyflats.flats.get(town).size();
             for (int i = 0; i < lengTh; i += 1) {
-                if (CheckIfBlInCity(i, town, x1,y1, z1)||res.isMayor()) {
-                    Resident ress = TownyUniverse.getInstance().getResident(Bukkit.getOfflinePlayer(UUID.fromString(townyflats.flats.get(town)[i].owner)).getName());
-                    if ((townyflats.flats.get(town)[i].owner.equals(pl.getUniqueId().toString())) || (res.isMayor())||(ress.hasFriend(res))) {
+                if (townyflats.flats.get(town).get(i).testIfInApartment(selecedBl1.getLocation())||res.isMayor()) {
+                    Resident ress = TownyUniverse.getInstance().getResident(Bukkit.getOfflinePlayer(UUID.fromString(townyflats.flats.get(town).get(i).owner)).getName());
+                    if ((townyflats.flats.get(town).get(i).owner.equals(pl.getUniqueId().toString())) || (res.isMayor())||(ress.hasFriend(res))) {
 
                         event.setCancelled(false);
                     }
@@ -76,7 +77,7 @@ public class BreakBlock implements Listener {
         }
     }}}}
     //wand
-    private void Privatev1(Player pl, Block selecedBl1, boolean testor,int x1,int y1,int z1) {
+    private void Privatev1(Player pl, Block selecedBl1, boolean testor, Location loc) {
         if (townyflats.cache.containsKey(pl.getUniqueId().toString())){
         if(!(townyflats.cache.get(pl.getUniqueId().toString()).xC == selecedBl1.getLocation().getChunk().getX() && townyflats.cache.get(pl.getUniqueId().toString()).zC == selecedBl1.getLocation().getChunk().getZ())) {
             townyflats.cache.remove(pl.getUniqueId().toString());
@@ -86,27 +87,22 @@ public class BreakBlock implements Listener {
         }}
             Townyflats.Apartment cacheL = new Townyflats.Apartment(0, 0, -100, -100, 0, 0,-100,-100, -1, pl.getUniqueId().toString());
             if (testor) {
-
-                cacheL.x1 = x1;
-                cacheL.y1 = y1;
-                cacheL.z1 = z1;
+                cacheL.setLocation1(loc);
                 if (townyflats.cache.containsKey(pl.getUniqueId().toString())) {
                     cacheL.x2 = townyflats.cache.get(pl.getUniqueId().toString()).x2;
                     cacheL.y2 = townyflats.cache.get(pl.getUniqueId().toString()).y2;
                     cacheL.z2 = townyflats.cache.get(pl.getUniqueId().toString()).z2;
                 }
-                pl.sendMessage(tapp + " pos 1 (x: " + x1 + "; y: " + y1 + "; z: " + z1 + ")");
+                pl.sendMessage(tapp + " pos 1 (x: " + cacheL.x1 + "; y: " + cacheL.y1 + "; z: " + cacheL.z1 + ")");
             } else {
 
-                cacheL.x2 = x1;
-                cacheL.y2 = y1;
-                cacheL.z2 = z1;
+                cacheL.setLocation2(loc);
                 if (townyflats.cache.containsKey(pl.getUniqueId().toString())) {
                     cacheL.x1 = townyflats.cache.get(pl.getUniqueId().toString()).x1;
                     cacheL.y1 = townyflats.cache.get(pl.getUniqueId().toString()).y1;
                     cacheL.z1 = townyflats.cache.get(pl.getUniqueId().toString()).z1;
                 }
-                pl.sendMessage(tapp + " pos 2 (x: " + x1 + "; y: " + y1 + "; z: " + z1 + ")");
+                pl.sendMessage(tapp + " pos 2 (x: " + cacheL.x2 + "; y: " + cacheL.y2 + "; z: " + cacheL.z2 + ")");
             }
         cacheL.zC = selecedBl1.getChunk().getZ();
         cacheL.xC = selecedBl1.getChunk().getX();
@@ -148,16 +144,11 @@ public class BreakBlock implements Listener {
                                 }
                             }, 40L);
                             f = true;
-                            int x1, y1, z1;
-                            x1 = selecedBl1.getLocation().getBlockX();
-                            y1 = selecedBl1.getLocation().getBlockY();
-                            z1 = selecedBl1.getLocation().getBlockZ();
                             if (townyflats.flats.containsKey(town)) {
-                                int lengTh = townyflats.flats.get(town).length;
+                                int lengTh = townyflats.flats.get(town).size();
                                 for (int i = 0; i < lengTh; i += 1) {
-                                    if (CheckIfBlInCity(i,town,x1,y1, z1)) {
+                                    if (townyflats.flats.get(town).get(i).testIfInApartment(selecedBl1.getLocation())) {
                                         pl.sendMessage(tapp + "There is already an apartment here");
-                                        y1 = -100;
                                         f = false;
                                         break;
                                     }
@@ -165,9 +156,9 @@ public class BreakBlock implements Listener {
                             }
                             if (f) {
                                 if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-                                    Privatev1(pl, selecedBl1, false,x1,y1, z1);
+                                    Privatev1(pl, selecedBl1, false, selecedBl1.getLocation());
                                 } else if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
-                                    Privatev1(pl, selecedBl1, true,x1,y1, z1);
+                                    Privatev1(pl, selecedBl1, true, selecedBl1.getLocation());
 
                                 }
 
@@ -192,39 +183,42 @@ public class BreakBlock implements Listener {
     }
     //Deleting the info on town/chunk deletion;
     @EventHandler
+    public void onInteract(PlayerInteractAtEntityEvent e) {
+        if(e.getRightClicked() instanceof ArmorStand) {
+            Player pl = e.getPlayer();
+           Town town = TownyAPI.getInstance().getTownBlock(e.getRightClicked().getLocation()).getTownOrNull();
+            if (town.hasResident(pl.getName())&&townyflats.flats.containsKey(town)){
+                for (Townyflats.Apartment ap: townyflats.flats.get(town) ){
+                    for (ArmorStand ar:ap.entitys){
+                        if (ar == e.getRightClicked()){
+                            if (( ap.price>=0 )&&(townyflats.econ.getBalance(pl) >= ap.price)) {
+                                f = false;
+                                ap.BuyPlot(pl);
+                            }
+                                break;
+                        }
+                    }
+                }
+
+
+        }}
+    }
+
+    @EventHandler
     public void onUnclaimChunk(TownPreUnclaimEvent pos1) {
         Town town = pos1.getTown();
-        int lengTh = townyflats.flats.get(town).length;
+        int lengTh = townyflats.flats.get(town).size();
         for (int i = 0; i < lengTh; i += 1) {
-            if ((pos1.getTownBlock().getX() == townyflats.flats.get(town)[i].xC)
-                    && (pos1.getTownBlock().getZ() == townyflats.flats.get(town)[i].zC)) {
-
-                Townyflats.Apartment[] copy = new Townyflats.Apartment[lengTh - 1];
-                f = false;
-                if (i + 1 != lengTh) {
-                    for (int j = 0; j < townyflats.flats.get(town).length; j++) {
-
-                        if (j >= i && j < i + 1) {
-
-                            copy[j] = townyflats.flats.get(town)[(lengTh - 1) + (j - i)];
-                        } else if (j >= lengTh - 1) {
-                            break;
-                        } else {
-                            copy[j] = townyflats.flats.get(town)[j];
-                        }
-
+            if ((pos1.getTownBlock().getX() == townyflats.flats.get(town).get(i).xC)
+                    && (pos1.getTownBlock().getZ() == townyflats.flats.get(town).get(i).zC)) {
+                    if (townyflats.flats.get(town).size() == 1){
+                        townyflats.flats.get(town).get(0).RemoveHologram();
+                        townyflats.flats.remove(town);
                     }
-                    townyflats.flats.put(town, copy);
-                } else if (lengTh != 1) {
-
-                    for (int j = 0; j < lengTh - 1; j++) {
-                        copy[j] = townyflats.flats.get(town)[j];
-                        townyflats.flats.put(town, copy);
-
+                    else {
+                        townyflats.flats.get(town).get(i).RemoveHologram();
+                        townyflats.flats.get(town).remove(i);
                     }
-                } else {
-                    townyflats.flats.remove(town);
-                }
 
             }
 
@@ -240,13 +234,4 @@ public class BreakBlock implements Listener {
     //}
 
     //something important
-    private boolean CheckIfBlInCity(int i,Town town,int x1,int y1,int z1) {
-        return ((x1 >= townyflats.flats.get(town)[i].x1 && x1 <= townyflats.flats.get(town)[i].x2)
-                || (x1 <= townyflats.flats.get(town)[i].x1 && x1 >= townyflats.flats.get(town)[i].x2))
-                && ((y1 >= townyflats.flats.get(town)[i].y1 && y1 <= townyflats.flats.get(town)[i].y2)
-                || (y1 <= townyflats.flats.get(town)[i].y1 && y1 >= townyflats.flats.get(town)[i].y2))
-                && ((z1 >= townyflats.flats.get(town)[i].z1 && z1 <= townyflats.flats.get(town)[i].z2)
-                || (z1 <= townyflats.flats.get(town)[i].z1 && z1 >= townyflats.flats.get(town)[i].z2));
-
-    }
 }
