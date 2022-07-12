@@ -6,7 +6,7 @@
 
     <groupId>me.Bedrye</groupId>
     <artifactId>TownyApartments</artifactId>
-    <version>0.65</version>
+    <version>0.7</version>
     <packaging>jar</packaging>
 
     <name>TownyApartments</name>
@@ -62,10 +62,6 @@
             <id>sonatype</id>
             <url>https://oss.sonatype.org/content/groups/public/</url>
         </repository>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
     </repositories>
 
     <dependencies>
@@ -79,12 +75,6 @@
             <groupId>com.github.TownyAdvanced</groupId>
             <artifactId>towny</artifactId>
             <version>0.98.1.12</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.github.MilkBowl</groupId>
-            <artifactId>VaultAPI</artifactId>
-            <version>1.7</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

@@ -7,7 +7,7 @@ description: Flats for towny!
 depend: [Towny]
 commands:
   tapp:
-    description: PIZDEC
+    description: Main tapp command
     usage: /<command>
 
 permissions:
@@ -17,8 +17,11 @@ permissions:
     children:
       townyappartaments.claim: true
       townyappartaments.delete: true
+      townyappartaments.reload: true
   townyappartaments.claim:
     description: Allows the creation of plots
   townyappartaments.delete:
     description: Allows the deletion of plots
+  townyappartaments.reload:
+      description: Allows the reloading of the plugin
 
