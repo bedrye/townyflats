@@ -136,10 +136,10 @@ public class Apartment {
         entitys[1] = (ArmorStand) loc.getWorld().spawnEntity(loc.add(0, 0.25, 0), EntityType.ARMOR_STAND);
         entitys[2] = (ArmorStand) loc.getWorld().spawnEntity(loc.add(0, 0.25, 0), EntityType.ARMOR_STAND);
         entitys[3] = (ArmorStand) loc.getWorld().spawnEntity(loc.add(0, 0.40, 0), EntityType.ARMOR_STAND);
-        entitys[3].setCustomName("§3FOR SALE");
-        entitys[2].setCustomName("Owner: §l" + owner);
-        entitys[1].setCustomName("Price §l" + price + "$");
-        entitys[0].setCustomName("§6§LRight-Click to buy");
+        entitys[3].setCustomName(tf.hologram_1);
+        entitys[2].setCustomName(tf.command_info_owner+" §l" + owner);
+        entitys[1].setCustomName(tf.command_info_sell+" §l" + price + tf.money_symbol);
+        entitys[0].setCustomName(tf.hologram_4);
         for (ArmorStand ent : entitys) {
             ent.setGravity(false);
             ent.setCanPickupItems(false);
@@ -185,8 +185,8 @@ public class Apartment {
 
 
     }
-    void DeleteFile(){
-        File userfile = new File(getProvidingPlugin(Townyflats.class).getDataFolder()+File.separator+"userdata"+File.separator+town.getName()+".yml");
+    void DeleteFile(Town t){
+        File userfile = new File(getProvidingPlugin(Townyflats.class).getDataFolder()+File.separator+"userdata"+File.separator+t.getName()+".yml");
         FileConfiguration userconfig = YamlConfiguration.loadConfiguration(userfile);
         userconfig.set("saved."+ID, null);
         try {
@@ -216,6 +216,9 @@ public class Apartment {
             tf.PFlats.get(rs).add(this);
         }
     }
+    void Deletion(){
+        new File(tf.getDataFolder()+File.separator+"userdata"+File.separator+town.getName()+".yml").delete();
+    }
     void ChangePlayer(Player pl){
         tf.PFlats.get(owner).remove(this);
         for (String p: residents) {
@@ -240,13 +243,14 @@ public class Apartment {
 
 
     }
-    void RemoveFromMaps(){
+    void RemoveFromMaps(Town t){
         tf.flats.remove(this);
-        if(tf.TFlats.get(town).size()==1){
-            tf.TFlats.remove(town);
-        }
+        if(tf.TFlats.get(t).size()==1){
+            tf.TFlats.remove(t);
+            File fl = new File(tf.getDataFolder()+File.separator+"userdata"+File.separator+t.getName()+".yml");
+            fl.delete();        }
         else {
-            tf.TFlats.get(town).remove(this);
+            tf.TFlats.get(t).remove(this);
         }
         if(tf.PFlats.get(owner).size()==1) {
             tf.PFlats.remove(owner);
@@ -300,26 +304,26 @@ public class Apartment {
     }
 
     void InfoCommand(Player pl) {
-        pl.sendMessage("§l§0[§4TAPP§l§0]§f §2Pos 1: §f(x:" + x1 + ";y:" + y1 + ";z:" + z1 + "); \n" +
-                "§2Pos 2: §f(x:" + x2 + ";y:" + y2 + ";z:" + z2 + ");\n" +
-                "§2Owner: §f" + owner + "; \n"
+        pl.sendMessage("§l§0[§4TAPP§l§0]§f §2"+tf.command_info_pos1+" §f(x:" + x1 + ";y:" + y1 + ";z:" + z1 + "); \n" +
+                "§2"+tf.command_info_pos2+" §f(x:" + x2 + ";y:" + y2 + ";z:" + z2 + ");\n" +
+                "§2"+tf.command_info_owner+" §f" + owner + "; \n"
                 );
         if (owner.equals(pl.getName())) {
-            TextComponent messagepr =new TextComponent("For sale: ");
+            TextComponent messagepr =new TextComponent(tf.command_info_sell);
             TextComponent messagep =new TextComponent(price+" ;");
             messagep.setColor(ChatColor.WHITE);
             messagepr.setColor(ChatColor.DARK_GREEN);
-            TextComponent messageAct =new TextComponent("[SELL]");
+            TextComponent messageAct =new TextComponent(tf.command_info_sell_button);
             messageAct.setColor(ChatColor.GREEN);
             messageAct.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tapp sell"));
             messagepr.addExtra(messagep);
             messagepr.addExtra(messageAct);
             pl.spigot().sendMessage(messagepr);
-            pl.sendMessage("§2Roommates:");
+            pl.sendMessage("§2"+tf.command_info_roommates);
             for (String st : residents) {
                 TextComponent message = new TextComponent("- "+st);
                 message.setColor(ChatColor.WHITE);
-                TextComponent message2 = new TextComponent(" [REMOVE]");
+                TextComponent message2 = new TextComponent(tf.command_info_roommates_button);
                 message2.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tapp remove " + st));
                 message2.setColor(ChatColor.RED);
                 message.addExtra(message2);
@@ -327,8 +331,8 @@ public class Apartment {
             }
             return;
         }
-        pl.sendMessage("§2For sale: §f" + price + ";");
-        pl.sendMessage("§2Roommates:");
+        pl.sendMessage("§2"+tf.command_info_sell+" §f" + price + ";");
+        pl.sendMessage("§2"+tf.command_info_roommates);
         for (String st : residents){
             pl.sendMessage("- "+st);
     }
@@ -359,7 +363,7 @@ public class Apartment {
         TownyUniverse.getInstance().getResident(pl.getUniqueId()).getAccount().payTo(price,TownyUniverse.getInstance().getResident(plOff.getUniqueId()).getAccount(),"Buying property");
        // econ.depositPlayer(plOff,price );
         ChangePlayer(pl);
-        pl.sendMessage("§L§0[§4TAPP§L§0]§f You have bought this property for §L"+price + "$");
+        pl.sendMessage("§L§0[§4TAPP§L§0]§f"+tf.command_buy_true+"§L"+price + tf.money_symbol);
         price = -1;
         RemoveHologram();
         pl.getWorld().playSound(pl.getLocation(), Sound.ENTITY_VILLAGER_YES,1,1);

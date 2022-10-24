@@ -40,6 +40,11 @@ public class TabComplete implements TabCompleter {
                         case "claim":
                             l.add("NAME");
                             break;
+                        case "list":
+                            l.add("player");
+                            l.add("town");
+                            l.add("chunk");
+                            break;
 
                     }
                 }

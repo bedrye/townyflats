@@ -6,7 +6,7 @@
 
     <groupId>me.Bedrye</groupId>
     <artifactId>TownyApartments</artifactId>
-    <version>0.7</version>
+    <version>0.73</version>
     <packaging>jar</packaging>
 
     <name>TownyApartments</name>

@@ -2,10 +2,14 @@ package me.bedrye.townyflats;
 
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.TownyUniverse;
+import com.palmergames.bukkit.towny.event.DeleteTownEvent;
 import com.palmergames.bukkit.towny.event.PlayerLeaveTownEvent;
+import com.palmergames.bukkit.towny.event.PreDeleteTownEvent;
 import com.palmergames.bukkit.towny.event.actions.*;
 import com.palmergames.bukkit.towny.event.town.TownPreUnclaimEvent;
 import com.palmergames.bukkit.towny.object.Resident;
+import com.palmergames.bukkit.towny.object.TownBlockType;
+import com.palmergames.bukkit.towny.object.WorldCoord;
 import org.bukkit.Bukkit;
 
 import org.bukkit.Chunk;
@@ -25,6 +29,7 @@ import org.bukkit.inventory.EquipmentSlot;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -57,7 +62,6 @@ public class BreakBlock implements Listener {
         Town town;
         if (!TownyAPI.getInstance().isWilderness(selecedBl1.getLocation())) {
             town = TownyAPI.getInstance().getTownBlock(selecedBl1.getLocation()).getTownOrNull();
-            if (town.hasResident(pl.getName())) {
                 Resident res = TownyUniverse.getInstance().getResident(pl.getName());
                 if (!res.isMayor()) {
                     if (townyflats.TFlats.containsKey(town)) {
@@ -74,13 +78,13 @@ public class BreakBlock implements Listener {
                         }
 
                     }
-                }}}}
+                }}}
     //wand
     private void Privatev1(Player pl, Block selecedBl1, boolean testor, Location loc) {
         if (townyflats.cache.containsKey(pl.getName())){
         if(!(townyflats.cache.get(pl.getName()).xC == selecedBl1.getLocation().getChunk().getX() && townyflats.cache.get(pl.getName()).zC == selecedBl1.getLocation().getChunk().getZ())) {
             townyflats.cache.remove(pl.getName());
-            pl.sendMessage(tapp + " Your new position is on the other chunk.All selected positions have been cleared");
+            pl.sendMessage(tapp + townyflats.clear_pos);
 
         return;
         }}
@@ -131,7 +135,7 @@ public class BreakBlock implements Listener {
                         if (town.hasResident(pl.getName())) {
 
                             if (townyflats.haveCooldowns.contains(pl.getUniqueId())) {
-                                pl.sendMessage(tapp +"Do not spam! Wait a bit");
+                                pl.sendMessage(tapp +townyflats.command_antispam);
                                 event.setCancelled(true);
                                 return;
 
@@ -147,7 +151,7 @@ public class BreakBlock implements Listener {
                                 int lengTh = townyflats.TFlats.get(town).size();
                                 for (int i = 0; i < lengTh; i += 1) {
                                     if (townyflats.TFlats.get(town).get(i).testIfInApartment(selecedBl1.getLocation())) {
-                                        pl.sendMessage(tapp + "There is already an apartment here");
+                                        pl.sendMessage(tapp + townyflats.already_apartment_here);
                                         f = false;
                                         break;
                                     }
@@ -194,15 +198,16 @@ public class BreakBlock implements Listener {
     public void onInteract(PlayerInteractAtEntityEvent e) {
         if(e.getRightClicked() instanceof ArmorStand) {
             Player pl = e.getPlayer();
+            Chunk ch = e.getRightClicked().getLocation().getChunk();
            Town town = TownyAPI.getInstance().getTownBlock(e.getRightClicked().getLocation()).getTownOrNull();
-            if (town.hasResident(pl.getName())&&townyflats.TFlats.containsKey(town)){
+            if ((town.hasResident(pl.getName())||TownyUniverse.getInstance().getTownBlockOrNull(new WorldCoord( ch.getWorld().getName(), ch.getX(), ch.getZ())).getType().equals(TownBlockType.EMBASSY))&&townyflats.TFlats.containsKey(town)){
                 for (Apartment ap: townyflats.TFlats.get(town) ){
                     for (ArmorStand ar:ap.entitys){
                         if (ar == e.getRightClicked()){
                             if (( ap.price>=0 )&&(TownyUniverse.getInstance().getResident(pl.getUniqueId()).getAccount().getHoldingBalance() >= ap.price)) {
                                 f = false;
                                 ap.BuyPlot(pl);
-                            }else {pl.sendMessage(tapp+" insufficient funds");}
+                            }else {pl.sendMessage(tapp+townyflats.command_sell_false);}
                                 return;
                         }
                     }
@@ -216,22 +221,34 @@ public class BreakBlock implements Listener {
     public void onUnclaimChunk(TownPreUnclaimEvent pos1) {
         Town town = pos1.getTown();
         Chunk ch = Bukkit.getWorld(pos1.getTownBlock().getWorld().getName()).getChunkAt(pos1.getTownBlock().getX(),pos1.getTownBlock().getZ());
+        Bukkit.getConsoleSender().sendMessage("Delete");
+        List<Apartment> l = new ArrayList<>();
         for (Apartment ap:townyflats.CFlats.get(ch.getX()+""+ch.getZ()+ch.getWorld().getName())) {
-               ap.RemoveHologram();
-               ap.DeleteFile();
-            ap.RemoveFromMaps();
-                    if (townyflats.TFlats.get(town).size() == 0){
-                        new File(townyflats.getDataFolder()+File.separator+"userdata"+File.separator+town.getName()+".yml").delete();
-                    }
+            Bukkit.getConsoleSender().sendMessage(ap.ID);
+                l.add(ap);
+
+
+        }
+        for (Apartment ap: l ) {
+            ap.RemoveHologram();
+            ap.DeleteFile(town);
+            ap.RemoveFromMaps(town);
         }
     }
-
-    //public void onTownDelete(PreDeleteTownEvent pos1) {
-    //    Town town = pos1.getTown();
-    //    if (townyflats.flats.containsKey(town)){
-    //    townyflats.flats.remove(town);
-    //}
-    //}
+    /*@EventHandler
+    public void onTownDelete(PreDeleteTownEvent pos1) {
+        Town town = pos1.getTown();
+       List<Apartment> l = new ArrayList<>();
+       for (Apartment ap:townyflats.TFlats.get(town)) {
+           Bukkit.getConsoleSender().sendMessage(ap.ID);
+           l.add(ap);
+       }
+       for (Apartment ap: l ) {
+           ap.RemoveHologram();
+           ap.DeleteFile();
+           ap.RemoveFromMaps();
+       }
+    }*/
 
     //something important
 }
