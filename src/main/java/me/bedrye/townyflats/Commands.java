@@ -16,8 +16,10 @@ import org.bukkit.entity.Player;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.Resident;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.util.Objects;
 import java.util.UUID;
 
 public class Commands implements CommandExecutor {
@@ -30,13 +32,13 @@ public class Commands implements CommandExecutor {
 }
 
     @Override
-    public boolean onCommand( CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, String label, String[] args) {
         if (label.equalsIgnoreCase("tapp")) {
             if (sender instanceof Player) {
 
                 Player pl = (Player) sender;
                 if (townyflats.haveCooldowns.contains(pl.getUniqueId())) {
-                    pl.sendMessage(tapp + townyflats.command_antispam);
+                    pl.sendMessage(tapp + Townyflats.getLang().command_antispam);
                     return true;
 
                 }
@@ -53,13 +55,13 @@ public class Commands implements CommandExecutor {
 
                     case "claim":
                         if (args.length==2) {
-                            if (pl.hasPermission("townyapartments.claim")|| res.isMayor()) {
+                            if (pl.hasPermission("townyapartments.claim")|| Objects.requireNonNull(res).isMayor()) {
                                 Claim(pl, res, args[1]);
                             }
                         }
                         break;
                     case "delete":
-                        if (pl.hasPermission("townyapartments.delete")|| res.isMayor()) {
+                        if (pl.hasPermission("townyapartments.delete")|| Objects.requireNonNull(res).isMayor()) {
                             Delete(pl);
                         }
                         break;
@@ -70,13 +72,14 @@ public class Commands implements CommandExecutor {
                         if (args.length==2) {
                             if (Integer.parseInt(args[1])>=0) {
                                 Sell(pl, args[1]);
-                            }else {pl.sendMessage(tapp +  townyflats.command_sell_false);}
+                            }else {pl.sendMessage(tapp +  Townyflats.getLang().command_sell_false);}
                         } else {
                             pl.sendMessage(tapp + "/tapp sell COST");
                         }
                         break;
                     case "info":
                         if(args.length>=2){
+                            assert res != null;
                             infoName(pl,res,args[1]);
                         }
                         else {
@@ -109,10 +112,12 @@ public class Commands implements CommandExecutor {
                                     break;
                                 case "town":
                                     if (args.length == 2) {
+                                        assert res != null;
                                         listtown(pl, 1, res.getTownOrNull());
                                     } else if (args.length == 3) {
                                         try {
                                             Integer.parseInt(args[2]);
+                                            assert res != null;
                                             listtown(pl, Integer.parseInt(args[2]), res.getTownOrNull());
                                         } catch (Exception e) {
                                             pl.sendMessage(tapp + " " + args[2] + " is not a valid integer");
@@ -164,7 +169,7 @@ public class Commands implements CommandExecutor {
                         }else {pl.sendMessage(tapp + "/tapp remove PLAYER");}
                         break;
                     default:
-                        pl.sendMessage(tapp + townyflats.incorrect_command);
+                        pl.sendMessage(tapp + Townyflats.getLang().incorrect_command);
                         break;
 
                 }
@@ -208,7 +213,7 @@ public class Commands implements CommandExecutor {
         }
     }
     private void list(Player pl,int num,String name) {
-        pl.sendMessage(tapp + townyflats.command_list);
+        pl.sendMessage(tapp + Townyflats.getLang().command_list);
         pl.sendMessage("");
         int i = 0;
         if (townyflats.PFlats.containsKey(name)) {
@@ -257,7 +262,7 @@ public class Commands implements CommandExecutor {
     }
 
     private void listtown(Player pl,int num,Town t) {
-        pl.sendMessage(tapp + townyflats.command_list);
+        pl.sendMessage(tapp + Townyflats.getLang().command_list);
         pl.sendMessage("");
         int i = 0;
         if (townyflats.TFlats.containsKey(t)) {
@@ -306,7 +311,7 @@ public class Commands implements CommandExecutor {
     }
 
     private void listchunk(Player pl,int num) {
-        pl.sendMessage(tapp + townyflats.command_list);
+        pl.sendMessage(tapp + Townyflats.getLang().command_list);
         pl.sendMessage("");
         String g = pl.getLocation().getChunk().getX()+""+pl.getLocation().getChunk().getZ()+pl.getLocation().getWorld().getName();
         int i = 0;
@@ -361,7 +366,7 @@ public class Commands implements CommandExecutor {
                 if (ChunkTestor(pl,res.getTownOrNull())){
                     Apartment loc =new Apartment(townyflats.cache.get(pl.getName()),-1,pl.getName(),id,res.getTownOrNull(),townyflats);
                     loc.WriteToMaps();
-                    pl.sendMessage(tapp+townyflats.command_claim_true);
+                    pl.sendMessage(tapp+ Townyflats.getLang().command_claim_true);
                     loc.SaveFile();
 
             }}
@@ -373,64 +378,65 @@ public class Commands implements CommandExecutor {
     private void Buy(Player pl){
         Town town;
         if (!TownyAPI.getInstance().isWilderness(pl.getLocation())) {
-            town = TownyAPI.getInstance().getTownBlock(pl.getLocation()).getTownOrNull();
+            town = Objects.requireNonNull(TownyAPI.getInstance().getTownBlock(pl.getLocation())).getTownOrNull();
+            assert town != null;
             if (town.hasResident(pl.getName())||TownyUniverse.getInstance().getTownBlockOrNull(new WorldCoord( pl.getLocation().getChunk().getWorld().getName(), pl.getLocation().getChunk().getX(), pl.getLocation().getChunk().getZ())).getType().equals(TownBlockType.EMBASSY)){
             if (townyflats.TFlats.containsKey(town)) {
                     if (CityTestor(pl,town)) {
                         int h =townyflats.TFlats.get(town).get(former).price;
-                        if (( h>=0 )&&(TownyUniverse.getInstance().getResident(pl.getUniqueId()).getAccount().getHoldingBalance()  >= h)) {
+                        if (( h>=0 )&&(Objects.requireNonNull(TownyUniverse.getInstance().getResident(pl.getUniqueId())).getAccount().getHoldingBalance()  >= h)) {
                             townyflats.TFlats.get(town).get(former).BuyPlot(pl);
                             return;
                         }else {
-                            pl.sendMessage(tapp+townyflats.command_buy_false);
+                            pl.sendMessage(tapp+Townyflats.getLang().command_buy_false);
                             return;
                         }
                 }
 
             }
         }}
-        pl.sendMessage(tapp+townyflats.command_buy_nothing);
+        pl.sendMessage(tapp+Townyflats.getLang().command_buy_nothing);
     }
     private void Sell(Player pl,String price){
         if (!TownyAPI.getInstance().isWilderness(pl.getLocation())) {
             if (townyflats.PFlats.containsKey(pl.getName())) {
                 for (Apartment ap:townyflats.PFlats.get(pl.getName())){
-                    if (ap.owner.equals(pl.getName()))
-                    if(ap.testIfInApartment(pl.getLocation())){
-                        ap.RemoveHologram();
-                        ap.price=Integer.parseInt(price);
-                        ap.SetHologram(pl.getLocation());
-                        pl.sendMessage(tapp+townyflats.command_sell_true);
-                        return;
-                    }
+                        if(ap.testIfInApartment(pl.getLocation()) && ap.owner.equals(pl.getName())){
+                            ap.RemoveHologram();
+                            ap.price=Integer.parseInt(price);
+                            ap.SetHologram(pl.getLocation());
+                            pl.sendMessage(tapp+Townyflats.getLang().command_sell_true);
+                            return;
+                        }
                 }
 
             }
         }
-        pl.sendMessage(tapp+townyflats.command_sell_nothing);
+        pl.sendMessage(tapp+Townyflats.getLang().command_sell_nothing);
     }
     private void Delete(Player pl){
         Town town;
         if (!TownyAPI.getInstance().isWilderness(pl.getLocation())) {
-            town = TownyAPI.getInstance().getTownBlock(pl.getLocation()).getTownOrNull();
+            town = Objects.requireNonNull(TownyAPI.getInstance().getTownBlock(pl.getLocation())).getTownOrNull();
             if (townyflats.TFlats.containsKey(town)&&CityTestor(pl,town)) {
                     if (lengTh == 1) {
                             townyflats.TFlats.get(town).get(0).RemoveHologram();
+                        assert town != null;
                         new File(townyflats.getDataFolder()+File.separator+"userdata"+File.separator+town.getName()+".yml").delete();
                         townyflats.TFlats.get(town).get(0).RemoveFromMaps(townyflats.TFlats.get(town).get(0).town);
-                        pl.sendMessage(tapp + townyflats.command_delete_true);
+                        pl.sendMessage(tapp + Townyflats.getLang().command_delete_true);
 
                     } else {
                         townyflats.TFlats.get(town).get(former).RemoveHologram();
                         townyflats.TFlats.get(town).get(former).DeleteFile(townyflats.TFlats.get(town).get(former).town);
                         townyflats.TFlats.get(town).get(former).RemoveFromMaps(townyflats.TFlats.get(town).get(former).town);
-                                pl.sendMessage(tapp + townyflats.command_delete_true);
+                                pl.sendMessage(tapp + Townyflats.getLang().command_delete_true);
 
                     }
                     return;
                 }
             }
-        pl.sendMessage(tapp+townyflats.command_delete_nothing);
+        pl.sendMessage(tapp+Townyflats.getLang().command_delete_nothing);
         }
     private void infoName(Player pl,Resident res,String ID){
          for(Apartment ap : townyflats.TFlats.get(res.getTownOrNull())){
@@ -442,7 +448,7 @@ public class Commands implements CommandExecutor {
     }
     private void info(Player pl) {
         if (!TownyAPI.getInstance().isWilderness(pl.getLocation())) {
-            Town town = TownyAPI.getInstance().getTownBlock(pl.getLocation()).getTownOrNull();
+            Town town = Objects.requireNonNull(TownyAPI.getInstance().getTownBlock(pl.getLocation())).getTownOrNull();
             if (townyflats.TFlats.get(town)!=null) {
                 if (CityTestor(pl,town)) {
                     townyflats.TFlats.get(town).get(former).InfoCommand(pl);
@@ -451,7 +457,7 @@ public class Commands implements CommandExecutor {
                 }
             }
         }
-        pl.sendMessage(tapp + townyflats.command_info_nothing);
+        pl.sendMessage(tapp + Townyflats.getLang().command_info_nothing);
     }
  private boolean CityTestor(Player pl,Town town){
         lengTh = townyflats.TFlats.get(town).size();
@@ -471,7 +477,7 @@ public class Commands implements CommandExecutor {
         for (int i = 0; i < lengTh; i += 1) {
             if (townyflats.TFlats.get(town).get(i).xC == townyflats.cache.get(pl.getName()).xC && townyflats.TFlats.get(town).get(i).zC == townyflats.cache.get(pl.getName()).zC) {
                 if (i+1 == townyflats.flatlim) {
-                    pl.sendMessage(tapp + townyflats.command_limit_reached);
+                    pl.sendMessage(tapp + Townyflats.getLang().command_limit_reached);
                     return false;
                 }
             }
