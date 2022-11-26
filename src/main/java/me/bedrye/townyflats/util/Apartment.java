@@ -1,8 +1,9 @@
-package me.bedrye.townyflats;
+package me.bedrye.townyflats.util;
 
-import com.palmergames.bukkit.towny.TownyEconomyHandler;
 import com.palmergames.bukkit.towny.TownyUniverse;
 import com.palmergames.bukkit.towny.object.Town;
+import me.bedrye.townyflats.TownyFlats;
+import me.bedrye.townyflats.util.LocatorLoc;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -17,22 +18,22 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 
-import static me.bedrye.townyflats.Townyflats.*;
 import static org.bukkit.plugin.java.JavaPlugin.getProvidingPlugin;
 
 public class Apartment {
-    final int x1,x2,y1,y2,z1,z2,xC,zC;
-    int price, xA,zA;
-    int yA = -100;
-    String owner;
-    final String world,ID,name;
-    final Town town;
-    ArrayList<String> residents = new ArrayList<>();
-    boolean hasHologram =false;
-    ArmorStand[] entitys= new ArmorStand[4] ;
-    final Townyflats tf;
-    public Apartment(LocatorLoc loc,int price,String owner,String name,Town town,Townyflats tf){
+    public final int x1,x2,y1,y2,z1,z2,xC,zC;
+    public int price, xA,zA;
+    public int yA = -100;
+    public String owner;
+    public final String world,ID,name;
+    public final Town town;
+    public ArrayList<String> residents = new ArrayList<>();
+    public boolean hasHologram =false;
+    public ArmorStand[] entitys= new ArmorStand[4] ;
+    public  final TownyFlats tf;
+    public Apartment(LocatorLoc loc, int price, String owner, String name, Town town, TownyFlats tf){
         this.x1 =loc.x1;
         this.x2 =loc.x2 ;
         this.y1 =loc.y1 ;
@@ -50,7 +51,7 @@ public class Apartment {
         ID = x1+""+x2+""+y1+""+y2+""+z1+""+z2+ world;
 
     }
-    public Apartment(int x1,int x2,int y1,int y2,int z1,int z2,int xC,int zC,int price,String owner,String world,String name,Town town,Townyflats tf){
+    public Apartment(int x1, int x2, int y1, int y2, int z1, int z2, int xC, int zC, int price, String owner, String world, String name, Town town, TownyFlats tf){
         this.x1 =x1;
         this.x2 =x2 ;
         this.y1 =y1 ;
@@ -68,18 +69,18 @@ public class Apartment {
         ID = x1+""+x2+""+y1+""+y2+""+z1+""+z2+ world;
 
     }
-    void setOwner(Player pl){
+    public void setOwner(Player pl){
         ChangePlayer(pl);
         price = -1;
     }
-    void addResident(String arg){
+    public void addResident(String arg){
         if (!residents.contains(arg)) {
             residents.add(arg);
             if (!tf.PFlats.containsKey(arg)) {
                 tf.PFlats.put(arg, new ArrayList<>());
             }
             tf.PFlats.get(arg).add(this);
-            File userfile = new File(getProvidingPlugin(Townyflats.class).getDataFolder()+File.separator+"userdata"+File.separator+town.getName()+".yml");
+            File userfile = new File(getProvidingPlugin(TownyFlats.class).getDataFolder()+File.separator+"userdata"+File.separator+town.getName()+".yml");
             FileConfiguration userconfig = YamlConfiguration.loadConfiguration(userfile);
             userconfig.set("saved." + ID + ".residents." + (residents.size() - 1), arg);
             try {
@@ -90,13 +91,13 @@ public class Apartment {
         }
 
     }
-    boolean hasResident(String arg){
+    public boolean hasResident(String arg){
     for (String bg: residents){
          if (arg.equals(bg)){return true;}
     }
     return false;
     }
-    void removeResident(String pl){
+    public void removeResident(String pl){
         if (residents.contains(pl)) {
             residents.remove(pl);
             if (tf.PFlats.get(pl).size() == 1) {
@@ -104,7 +105,7 @@ public class Apartment {
             } else {
                 tf.PFlats.get(pl).remove(this);
             }
-            File userfile = new File(getProvidingPlugin(Townyflats.class).getDataFolder()+File.separator+"userdata"+File.separator+town.getName()+".yml");
+            File userfile = new File(getProvidingPlugin(TownyFlats.class).getDataFolder()+File.separator+"userdata"+File.separator+town.getName()+".yml");
             FileConfiguration userconfig = YamlConfiguration.loadConfiguration(userfile);
             userconfig.set("saved." + ID + ".residents", null);
             int d = 0;
@@ -119,7 +120,7 @@ public class Apartment {
             }
         }
     }
-    boolean testIfInApartment(Location loc){
+    public boolean testIfInApartment(Location loc){
         return (((x1 >= loc.getBlockX()  && x2 <= loc.getBlockX())
                 || (x1 <= loc.getBlockX() && x2 >= loc.getBlockX()))
                 && ((y1 >= loc.getBlockY() && y2 <= loc.getBlockY())
@@ -127,7 +128,7 @@ public class Apartment {
                 && ((z1 >= loc.getBlockZ() && z2 <= loc.getBlockZ())
                 || (z1 <= loc.getBlockZ() && z2 >= loc.getBlockZ())));
     }
-    void SetHologram(Location loc) {
+    public void SetHologram(Location loc) {
         hasHologram =true;
         xA = loc.getBlockX();
         zA = loc.getBlockZ();
@@ -136,10 +137,10 @@ public class Apartment {
         entitys[1] = (ArmorStand) loc.getWorld().spawnEntity(loc.add(0, 0.25, 0), EntityType.ARMOR_STAND);
         entitys[2] = (ArmorStand) loc.getWorld().spawnEntity(loc.add(0, 0.25, 0), EntityType.ARMOR_STAND);
         entitys[3] = (ArmorStand) loc.getWorld().spawnEntity(loc.add(0, 0.40, 0), EntityType.ARMOR_STAND);
-        entitys[3].setCustomName(tf.hologram_1);
-        entitys[2].setCustomName(tf.command_info_owner+" §l" + owner);
-        entitys[1].setCustomName(tf.command_info_sell+" §l" + price + tf.money_symbol);
-        entitys[0].setCustomName(tf.hologram_4);
+        entitys[3].setCustomName(TownyFlats.getLang().hologram_1);
+        entitys[2].setCustomName(TownyFlats.getLang().command_info_owner+" §l" + owner);
+        entitys[1].setCustomName(TownyFlats.getLang().command_info_sell+" §l" + price + TownyFlats.getLang().money_symbol);
+        entitys[0].setCustomName(TownyFlats.getLang().hologram_4);
         for (ArmorStand ent : entitys) {
             ent.setGravity(false);
             ent.setCanPickupItems(false);
@@ -152,8 +153,8 @@ public class Apartment {
 
         loc.getWorld().playEffect(loc, Effect.MOBSPAWNER_FLAMES, 2004);
     }
-    void SaveFile(){
-        File userfile = new File(getProvidingPlugin(Townyflats.class).getDataFolder()+File.separator+"userdata"+File.separator+town.getName()+".yml");
+    public void SaveFile(){
+        File userfile = new File(getProvidingPlugin(TownyFlats.class).getDataFolder()+File.separator+"userdata"+File.separator+town.getName()+".yml");
         FileConfiguration userconfig = YamlConfiguration.loadConfiguration(userfile);
         userconfig.set("saved."+ID+".x1",x1);
         userconfig.set("saved."+ID+".x2",x2);
@@ -185,8 +186,8 @@ public class Apartment {
 
 
     }
-    void DeleteFile(Town t){
-        File userfile = new File(getProvidingPlugin(Townyflats.class).getDataFolder()+File.separator+"userdata"+File.separator+t.getName()+".yml");
+    public void DeleteFile(Town t){
+        File userfile = new File(getProvidingPlugin(TownyFlats.class).getDataFolder()+File.separator+"userdata"+File.separator+t.getName()+".yml");
         FileConfiguration userconfig = YamlConfiguration.loadConfiguration(userfile);
         userconfig.set("saved."+ID, null);
         try {
@@ -195,7 +196,7 @@ public class Apartment {
             e.printStackTrace();
         }
     }
-    void WriteToMaps(){
+    public void WriteToMaps(){
         tf.flats.add(this);
         if(!tf.TFlats.containsKey(town)) {
             tf.TFlats.put(town, new ArrayList<>());
@@ -219,7 +220,7 @@ public class Apartment {
     void Deletion(){
         new File(tf.getDataFolder()+File.separator+"userdata"+File.separator+town.getName()+".yml").delete();
     }
-    void ChangePlayer(Player pl){
+    public void ChangePlayer(Player pl){
         tf.PFlats.get(owner).remove(this);
         for (String p: residents) {
             tf.PFlats.get(p).remove(this);
@@ -230,7 +231,7 @@ public class Apartment {
         }
         tf.PFlats.get(pl.getName()).add(this);
         owner = pl.getName();
-        File userfile = new File(getProvidingPlugin(Townyflats.class).getDataFolder()+File.separator+"userdata"+File.separator+town.getName()+".yml");
+        File userfile = new File(getProvidingPlugin(TownyFlats.class).getDataFolder()+File.separator+"userdata"+File.separator+town.getName()+".yml");
         FileConfiguration userconfig = YamlConfiguration.loadConfiguration(userfile);
         userconfig.set("saved."+ID+".owner",owner);
         userconfig.set("saved."+ID+".price",-1);
@@ -243,7 +244,7 @@ public class Apartment {
 
 
     }
-    void RemoveFromMaps(Town t){
+    public void RemoveFromMaps(Town t){
         tf.flats.remove(this);
         if(tf.TFlats.get(t).size()==1){
             tf.TFlats.remove(t);
@@ -270,7 +271,7 @@ public class Apartment {
             }
         }
     }
-    void HologramInfo(Player pl) {
+    public void HologramInfo(Player pl) {
         new BukkitRunnable() {
             private int i = 0;
             public void run() {
@@ -300,30 +301,30 @@ public class Apartment {
                     cancel();
                 }
             }
-        }.runTaskTimer(getProvidingPlugin(Townyflats.class), 20L, 20L);
+        }.runTaskTimer(getProvidingPlugin(TownyFlats.class), 20L, 20L);
     }
 
-    void InfoCommand(Player pl) {
-        pl.sendMessage("§l§0[§4TAPP§l§0]§f §2"+tf.command_info_pos1+" §f(x:" + x1 + ";y:" + y1 + ";z:" + z1 + "); \n" +
-                "§2"+tf.command_info_pos2+" §f(x:" + x2 + ";y:" + y2 + ";z:" + z2 + ");\n" +
-                "§2"+tf.command_info_owner+" §f" + owner + "; \n"
+    public void InfoCommand(Player pl) {
+        pl.sendMessage("§l§0[§4TAPP§l§0]§f §2"+ TownyFlats.getLang().command_info_pos1 +" §f(x:" + x1 + ";y:" + y1 + ";z:" + z1 + "); \n" +
+                "§2"+ TownyFlats.getLang().command_info_pos2+" §f(x:" + x2 + ";y:" + y2 + ";z:" + z2 + ");\n" +
+                "§2"+ TownyFlats.getLang().command_info_owner+" §f" + owner + "; \n"
                 );
         if (owner.equals(pl.getName())) {
-            TextComponent messagepr =new TextComponent(tf.command_info_sell);
+            TextComponent messagepr =new TextComponent(TownyFlats.getLang().command_info_sell);
             TextComponent messagep =new TextComponent(price+" ;");
             messagep.setColor(ChatColor.WHITE);
             messagepr.setColor(ChatColor.DARK_GREEN);
-            TextComponent messageAct =new TextComponent(tf.command_info_sell_button);
+            TextComponent messageAct =new TextComponent(TownyFlats.getLang().command_info_sell_button);
             messageAct.setColor(ChatColor.GREEN);
             messageAct.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tapp sell"));
             messagepr.addExtra(messagep);
             messagepr.addExtra(messageAct);
             pl.spigot().sendMessage(messagepr);
-            pl.sendMessage("§2"+tf.command_info_roommates);
+            pl.sendMessage("§2"+ TownyFlats.getLang().command_info_roommates);
             for (String st : residents) {
                 TextComponent message = new TextComponent("- "+st);
                 message.setColor(ChatColor.WHITE);
-                TextComponent message2 = new TextComponent(tf.command_info_roommates_button);
+                TextComponent message2 = new TextComponent(TownyFlats.getLang().command_info_roommates_button);
                 message2.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tapp remove " + st));
                 message2.setColor(ChatColor.RED);
                 message.addExtra(message2);
@@ -331,13 +332,13 @@ public class Apartment {
             }
             return;
         }
-        pl.sendMessage("§2"+tf.command_info_sell+" §f" + price + ";");
-        pl.sendMessage("§2"+tf.command_info_roommates);
+        pl.sendMessage("§2"+ TownyFlats.getLang().command_info_sell+" §f" + price + ";");
+        pl.sendMessage("§2"+ TownyFlats.getLang().command_info_roommates);
         for (String st : residents){
             pl.sendMessage("- "+st);
     }
     }
-    void RemoveHologram(){
+    public void RemoveHologram(){
         if (hasHologram){
             for (ArmorStand ent:entitys) {
                 ent.remove();
@@ -345,9 +346,9 @@ public class Apartment {
             hasHologram=false;
             yA = -100;
         }}
-    void SetPrice(int pr){
+    public void SetPrice(int pr){
         price = pr;
-        File userfile = new File(getProvidingPlugin(Townyflats.class).getDataFolder()+File.separator+"userdata"+File.separator+town.getName()+".yml");
+        File userfile = new File(getProvidingPlugin(TownyFlats.class).getDataFolder()+File.separator+"userdata"+File.separator+town.getName()+".yml");
         FileConfiguration userconfig = YamlConfiguration.loadConfiguration(userfile);
         userconfig.set("saved."+ID+".price",pr);
         try {
@@ -357,48 +358,15 @@ public class Apartment {
         }
 
     }
-    void BuyPlot(Player pl){
+    public void BuyPlot(Player pl){
        // econ.withdrawPlayer(pl,price );
         OfflinePlayer plOff = Bukkit.getOfflinePlayer(owner);
-        TownyUniverse.getInstance().getResident(pl.getUniqueId()).getAccount().payTo(price,TownyUniverse.getInstance().getResident(plOff.getUniqueId()).getAccount(),"Buying property");
+        Objects.requireNonNull(TownyUniverse.getInstance().getResident(pl.getUniqueId())).getAccount().payTo(price, Objects.requireNonNull(TownyUniverse.getInstance().getResident(plOff.getUniqueId())).getAccount(),"Buying property");
        // econ.depositPlayer(plOff,price );
         ChangePlayer(pl);
-        pl.sendMessage("§L§0[§4TAPP§L§0]§f"+tf.command_buy_true+"§L"+price + tf.money_symbol);
+        pl.sendMessage("§L§0[§4TAPP§L§0]§f"+ TownyFlats.getLang().command_buy_true+"§L"+price + TownyFlats.getLang().money_symbol);
         price = -1;
         RemoveHologram();
         pl.getWorld().playSound(pl.getLocation(), Sound.ENTITY_VILLAGER_YES,1,1);
     }
-
-        /*void setX1(int pos){
-            x1= pos;
-        }
-        void setX2(int pos){
-            x2= pos;
-        }
-        void setY1(int pos){
-            y1= pos;
-        }
-        void setY2(int pos){
-            y2= pos;
-        }
-        void setZ1(int pos){
-            z1= pos;
-        }
-        void setZ2(int pos){
-            z2= pos;
-        }
-        void setxC(int pos){
-            z2= pos;
-        }
-        void setzC(int pos){
-            z2= pos;
-        }
-        void setPrice(int pos){
-            price= pos;
-        }
-        void setOwner(String pos){
-            owner = pos;
-        }*/
-
-
 }
