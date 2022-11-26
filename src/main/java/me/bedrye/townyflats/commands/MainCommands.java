@@ -1,8 +1,10 @@
-package me.bedrye.townyflats;
+package me.bedrye.townyflats.commands;
 
 import com.palmergames.bukkit.towny.TownyUniverse;
 import com.palmergames.bukkit.towny.object.TownBlockType;
 import com.palmergames.bukkit.towny.object.WorldCoord;
+import me.bedrye.townyflats.util.Apartment;
+import me.bedrye.townyflats.TownyFlats;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -20,14 +22,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.Objects;
-import java.util.UUID;
 
-public class Commands implements CommandExecutor {
-    public final Townyflats townyflats;
+public class MainCommands implements CommandExecutor {
+    public final TownyFlats townyflats;
     private final String tapp ="§l§0[§4TAPP§l§0]§f";
     private int former;
     private int lengTh;
-    public Commands(Townyflats townyflats){
+    public MainCommands(TownyFlats townyflats){
         this.townyflats = townyflats;
 }
 
@@ -38,7 +39,7 @@ public class Commands implements CommandExecutor {
 
                 Player pl = (Player) sender;
                 if (townyflats.haveCooldowns.contains(pl.getUniqueId())) {
-                    pl.sendMessage(tapp + Townyflats.getLang().command_antispam);
+                    pl.sendMessage(tapp + TownyFlats.getLang().command_antispam);
                     return true;
 
                 }
@@ -72,7 +73,7 @@ public class Commands implements CommandExecutor {
                         if (args.length==2) {
                             if (Integer.parseInt(args[1])>=0) {
                                 Sell(pl, args[1]);
-                            }else {pl.sendMessage(tapp +  Townyflats.getLang().command_sell_false);}
+                            }else {pl.sendMessage(tapp +  TownyFlats.getLang().command_sell_false);}
                         } else {
                             pl.sendMessage(tapp + "/tapp sell COST");
                         }
@@ -152,9 +153,9 @@ public class Commands implements CommandExecutor {
                     case "reload":
                         if (pl.hasPermission("townyapartments.reload")){
                             pl.sendMessage("Reloading...");
-                            townyflats.Save();
-                            townyflats.Load();
-                            townyflats.Restart();
+                            townyflats.save();
+                            townyflats.load();
+                            townyflats.restart();
                             pl.sendMessage("Done!");
                     }
                         break;
@@ -169,7 +170,7 @@ public class Commands implements CommandExecutor {
                         }else {pl.sendMessage(tapp + "/tapp remove PLAYER");}
                         break;
                     default:
-                        pl.sendMessage(tapp + Townyflats.getLang().incorrect_command);
+                        pl.sendMessage(tapp + TownyFlats.getLang().incorrect_command);
                         break;
 
                 }
@@ -213,7 +214,7 @@ public class Commands implements CommandExecutor {
         }
     }
     private void list(Player pl,int num,String name) {
-        pl.sendMessage(tapp + Townyflats.getLang().command_list);
+        pl.sendMessage(tapp + TownyFlats.getLang().command_list);
         pl.sendMessage("");
         int i = 0;
         if (townyflats.PFlats.containsKey(name)) {
@@ -262,7 +263,7 @@ public class Commands implements CommandExecutor {
     }
 
     private void listtown(Player pl,int num,Town t) {
-        pl.sendMessage(tapp + Townyflats.getLang().command_list);
+        pl.sendMessage(tapp + TownyFlats.getLang().command_list);
         pl.sendMessage("");
         int i = 0;
         if (townyflats.TFlats.containsKey(t)) {
@@ -311,7 +312,7 @@ public class Commands implements CommandExecutor {
     }
 
     private void listchunk(Player pl,int num) {
-        pl.sendMessage(tapp + Townyflats.getLang().command_list);
+        pl.sendMessage(tapp + TownyFlats.getLang().command_list);
         pl.sendMessage("");
         String g = pl.getLocation().getChunk().getX()+""+pl.getLocation().getChunk().getZ()+pl.getLocation().getWorld().getName();
         int i = 0;
@@ -366,7 +367,7 @@ public class Commands implements CommandExecutor {
                 if (ChunkTestor(pl,res.getTownOrNull())){
                     Apartment loc =new Apartment(townyflats.cache.get(pl.getName()),-1,pl.getName(),id,res.getTownOrNull(),townyflats);
                     loc.WriteToMaps();
-                    pl.sendMessage(tapp+ Townyflats.getLang().command_claim_true);
+                    pl.sendMessage(tapp+ TownyFlats.getLang().command_claim_true);
                     loc.SaveFile();
 
             }}
@@ -388,14 +389,14 @@ public class Commands implements CommandExecutor {
                             townyflats.TFlats.get(town).get(former).BuyPlot(pl);
                             return;
                         }else {
-                            pl.sendMessage(tapp+Townyflats.getLang().command_buy_false);
+                            pl.sendMessage(tapp+ TownyFlats.getLang().command_buy_false);
                             return;
                         }
                 }
 
             }
         }}
-        pl.sendMessage(tapp+Townyflats.getLang().command_buy_nothing);
+        pl.sendMessage(tapp+ TownyFlats.getLang().command_buy_nothing);
     }
     private void Sell(Player pl,String price){
         if (!TownyAPI.getInstance().isWilderness(pl.getLocation())) {
@@ -405,14 +406,14 @@ public class Commands implements CommandExecutor {
                             ap.RemoveHologram();
                             ap.price=Integer.parseInt(price);
                             ap.SetHologram(pl.getLocation());
-                            pl.sendMessage(tapp+Townyflats.getLang().command_sell_true);
+                            pl.sendMessage(tapp+ TownyFlats.getLang().command_sell_true);
                             return;
                         }
                 }
 
             }
         }
-        pl.sendMessage(tapp+Townyflats.getLang().command_sell_nothing);
+        pl.sendMessage(tapp+ TownyFlats.getLang().command_sell_nothing);
     }
     private void Delete(Player pl){
         Town town;
@@ -424,19 +425,19 @@ public class Commands implements CommandExecutor {
                         assert town != null;
                         new File(townyflats.getDataFolder()+File.separator+"userdata"+File.separator+town.getName()+".yml").delete();
                         townyflats.TFlats.get(town).get(0).RemoveFromMaps(townyflats.TFlats.get(town).get(0).town);
-                        pl.sendMessage(tapp + Townyflats.getLang().command_delete_true);
+                        pl.sendMessage(tapp + TownyFlats.getLang().command_delete_true);
 
                     } else {
                         townyflats.TFlats.get(town).get(former).RemoveHologram();
                         townyflats.TFlats.get(town).get(former).DeleteFile(townyflats.TFlats.get(town).get(former).town);
                         townyflats.TFlats.get(town).get(former).RemoveFromMaps(townyflats.TFlats.get(town).get(former).town);
-                                pl.sendMessage(tapp + Townyflats.getLang().command_delete_true);
+                                pl.sendMessage(tapp + TownyFlats.getLang().command_delete_true);
 
                     }
                     return;
                 }
             }
-        pl.sendMessage(tapp+Townyflats.getLang().command_delete_nothing);
+        pl.sendMessage(tapp+ TownyFlats.getLang().command_delete_nothing);
         }
     private void infoName(Player pl,Resident res,String ID){
          for(Apartment ap : townyflats.TFlats.get(res.getTownOrNull())){
@@ -457,7 +458,7 @@ public class Commands implements CommandExecutor {
                 }
             }
         }
-        pl.sendMessage(tapp + Townyflats.getLang().command_info_nothing);
+        pl.sendMessage(tapp + TownyFlats.getLang().command_info_nothing);
     }
  private boolean CityTestor(Player pl,Town town){
         lengTh = townyflats.TFlats.get(town).size();
@@ -477,7 +478,7 @@ public class Commands implements CommandExecutor {
         for (int i = 0; i < lengTh; i += 1) {
             if (townyflats.TFlats.get(town).get(i).xC == townyflats.cache.get(pl.getName()).xC && townyflats.TFlats.get(town).get(i).zC == townyflats.cache.get(pl.getName()).zC) {
                 if (i+1 == townyflats.flatlim) {
-                    pl.sendMessage(tapp + Townyflats.getLang().command_limit_reached);
+                    pl.sendMessage(tapp + TownyFlats.getLang().command_limit_reached);
                     return false;
                 }
             }

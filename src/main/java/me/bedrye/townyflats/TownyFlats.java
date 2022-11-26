@@ -1,7 +1,12 @@
 package me.bedrye.townyflats;
 
 import com.palmergames.bukkit.towny.TownyUniverse;
+import me.bedrye.townyflats.commands.MainCommands;
+import me.bedrye.townyflats.commands.MainCommandsTabComp;
+import me.bedrye.townyflats.events.BreakBlockEvent;
+import me.bedrye.townyflats.util.Apartment;
 import me.bedrye.townyflats.util.Lang;
+import me.bedrye.townyflats.util.LocatorLoc;
 import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -11,12 +16,12 @@ import com.palmergames.bukkit.towny.object.Town;
 import java.io.File;
 import java.util.*;
 
-public final class Townyflats extends JavaPlugin {
+public final class TownyFlats extends JavaPlugin {
     public Map<String, LocatorLoc> cache = new HashMap<>();
     //public static Economy econ = null;
     public int flatlim;
-    Material wand;
-    ArrayList<UUID> haveCooldowns = new ArrayList<UUID>();
+    public Material wand;
+    public ArrayList<UUID> haveCooldowns = new ArrayList<UUID>();
     public ArrayList<Apartment> flats = new ArrayList<Apartment>();
     public Map<Town,ArrayList<Apartment>> TFlats = new HashMap<>();
     public Map<String,ArrayList<Apartment>> PFlats = new HashMap<>();
@@ -29,9 +34,9 @@ public final class Townyflats extends JavaPlugin {
         return lang;
     }
 
-    private static Townyflats instance;
+    private static TownyFlats instance;
 
-    public static Townyflats getInstance() {
+    public static TownyFlats getInstance() {
         return instance;
     }
 
@@ -39,15 +44,9 @@ public final class Townyflats extends JavaPlugin {
     public void onEnable() {
         // Plugin startup logic
         instance = this;
-        /*if (!setupEconomy() ) {
-            Bukkit.getConsoleSender().sendMessage("[TAPP] - Disabled due to no Vault dependency found!");
-            getServer().getPluginManager().disablePlugin(this);
-            return;
-        }*/
-
-
-        Load();
-        Restart();
+        Lang.initialLoad();
+        load();
+        restart();
         registerCommands();
         loadListeners();
         registerListeners();
@@ -58,15 +57,15 @@ public final class Townyflats extends JavaPlugin {
     }
 
     public void registerListeners(){
-        getServer().getPluginManager().registerEvents(new BreakBlock(this ),this);
+        getServer().getPluginManager().registerEvents(new BreakBlockEvent(this ),this);
     }
 
     public void registerCommands(){
-        Objects.requireNonNull(getServer().getPluginCommand("tapp")).setExecutor(new Commands(this));
-        Objects.requireNonNull(getServer().getPluginCommand("tapp")).setTabCompleter(new TabComplete());
+        Objects.requireNonNull(getServer().getPluginCommand("tapp")).setExecutor(new MainCommands(this));
+        Objects.requireNonNull(getServer().getPluginCommand("tapp")).setTabCompleter(new MainCommandsTabComp());
     }
 
-    void Restart(){
+    public void restart(){
         reloadConfig();
         getConfig().options().copyDefaults(true);
         saveConfig();
@@ -102,26 +101,15 @@ public final class Townyflats extends JavaPlugin {
                 });
             });}
     }
-    /*private boolean setupEconomy() {
-        if (getServer().getPluginManager().getPlugin("Vault") == null) {
-            return false;
-        }
-        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
-        if (rsp == null) {
-            return false;
-        }
-        econ = rsp.getProvider();
-        return econ != null;
-    }*/
 
     @Override
     public void onDisable() {
         Bukkit.getConsoleSender().sendMessage("[TAPP] - Saving... !");
-        Save();
+        save();
         Bukkit.getConsoleSender().sendMessage("[TAPP] - Disabled !");
     }
 
-    void Load() {
+    public void load() {
         if (new File(this.getDataFolder().getAbsolutePath() + File.separator + "userdata").listFiles()!= null) {
             for (File file : Objects.requireNonNull(new File(this.getDataFolder().getAbsolutePath() + File.separator + "userdata").listFiles())) {
                 FileConfiguration conf = YamlConfiguration.loadConfiguration(file);
@@ -164,7 +152,7 @@ public final class Townyflats extends JavaPlugin {
         }
 
     }
-    void Save(){
+    public void save(){
             for(Apartment g: flats) {
                 g.SaveFile();
                 g.RemoveHologram();

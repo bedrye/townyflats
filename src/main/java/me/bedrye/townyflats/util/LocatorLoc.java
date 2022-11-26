@@ -1,10 +1,10 @@
-package me.bedrye.townyflats;
+package me.bedrye.townyflats.util;
 
 import org.bukkit.Location;
 
 public class LocatorLoc {
-    int x1,x2,y1,y2,z1,z2,xC,zC;
-    String world;
+    public int x1,x2,y1,y2,z1,z2,xC,zC;
+    public String world;
     public LocatorLoc(int x1,int x2,int y1,int y2,int z1,int z2,int xC, int zC,String world) {
         this.x1 = x1;
         this.x2 = x2;
@@ -16,13 +16,13 @@ public class LocatorLoc {
         this.xC = xC;
         this.world = world;
     }
-        void setLocation1(Location loc)
+        public void setLocation1(Location loc)
         {
             x1 = loc.getBlockX();
             y1 = loc.getBlockY();
             z1 = loc.getBlockZ();
         }
-        void setLocation2(Location loc)
+        public void setLocation2(Location loc)
         {
             x2 = loc.getBlockX();
             y2 = loc.getBlockY();

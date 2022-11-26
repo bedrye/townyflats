@@ -1,4 +1,4 @@
-package me.bedrye.townyflats;
+package me.bedrye.townyflats.commands;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TabComplete implements TabCompleter {
+public class MainCommandsTabComp implements TabCompleter {
     @Override
     public List<String> onTabComplete (@NotNull CommandSender sender, @NotNull Command cmd, String label, String[] args){
         List<String> l = new ArrayList<>();
