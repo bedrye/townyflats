@@ -1,6 +1,6 @@
 name: TownyApartments
 version: '${project.version}'
-main: me.bedrye.townyflats.Townyflats
+main: me.bedrye.townyflats.TownyFlats
 api-version: 1.16
 authors: [ Bedrye ]
 description: Flats for towny!
@@ -11,17 +11,44 @@ commands:
     usage: /<command>
 
 permissions:
-  townyappartaments.*:
+  townyapartments.*:
     description: Gives access to all commands
     default: op
     children:
-      townyappartaments.claim: true
-      townyappartaments.delete: true
-      townyappartaments.reload: true
-  townyappartaments.claim:
-    description: Allows the creation of plots
-  townyappartaments.delete:
+      townyapartments.admin.*: true
+      townyapartments.player.*: true
+  townyapartments.admin.*:
+    description: Gives access to all admin commands
+    children:
+      townyapartments.admin.reload: true
+      townyapartments.admin.claim: true
+      townyapartments.admin.delete: true
+  townyapartments.player.*:
+    description: Gives access to all player commands
+    children:
+      townyapartments.player.claim: true
+      townyapartments.player.buy: true
+      townyapartments.player.delete: true
+      townyapartments.player.info: true
+      townyapartments.player.sell: true
+  townyapartments.player.claim:
+    description: Allows to claim plots
+  townyapartments.player.buy:
+    description: Allows to buy plots
+  townyapartments.player.delete:
     description: Allows the deletion of plots
-  townyappartaments.reload:
-      description: Allows the reloading of the plugin
+  townyapartments.player.info:
+    description: Allows the usage /info
+  townyapartments.player.sell:
+    description: Allows the selling of plots
+  townyapartments.admin.reload:
+    description: Allows to reload the plugin
+  townyapartments.admin.claim:
+    description: Allows to claim plots in any town
+    children:
+      townyapartments.player.claim: true
+  townyapartments.admin.delete:
+    description: Allows to delete plots in any town
+    children:
+      townyapartments.player.delete: true
 

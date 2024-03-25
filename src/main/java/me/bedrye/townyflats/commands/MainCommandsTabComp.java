@@ -16,13 +16,13 @@ public class MainCommandsTabComp implements TabCompleter {
         if(label.equalsIgnoreCase("tapp")){
             if (sender instanceof Player) {
                 if (args.length == 1) {
-                    if (sender.hasPermission("townyapartments.claim")) {
+                    if (sender.hasPermission("townyapartments.player.claim")) {
                         l.add("claim");
                     }
-                    if (sender.hasPermission("townyapartments.delete")) {
+                    if (sender.hasPermission("townyapartments.player.delete")) {
                         l.add("delete");
                     }
-                    if (sender.hasPermission("townyapartments.reload")) {
+                    if (sender.hasPermission("townyapartments.admin.reload")) {
                         l.add("reload");
                     }
                     l.add("buy");
@@ -33,7 +33,7 @@ public class MainCommandsTabComp implements TabCompleter {
                     l.add("add");
 
                 }
-                if (args.length == 2) {
+                else if (args.length == 2) {
                     switch (args[0].toLowerCase()) {
                         case "sell":
                             l.add("COST");
@@ -42,7 +42,6 @@ public class MainCommandsTabComp implements TabCompleter {
                             l.add("NAME");
                             break;
                         case "list":
-                            l.add("player");
                             l.add("town");
                             l.add("chunk");
                             break;
