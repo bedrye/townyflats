@@ -129,7 +129,7 @@ public class FlatsEventManager implements Listener {
         if(e.getRightClicked() instanceof ArmorStand) {
             Player pl = e.getPlayer();
             Town town = Objects.requireNonNull(TownyAPI.getInstance().getTownBlock(e.getRightClicked().getLocation())).getTownOrNull();
-            assert town != null;
+            assert town != null:"Town is null!";
                 for (Apartment ap: FlatManager.getApartments(town) ){
                     ap.BuyWithHologram((ArmorStand) e.getRightClicked(),TownyUniverse.getInstance().getResident(pl.getUniqueId()));
                     }

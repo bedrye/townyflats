@@ -125,29 +125,35 @@ public final class FlatManager {
         pl.getLocation().getWorld().playSound(pl.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1, 2);
     }
     public static void putNew(Town town){
-        TFlats.put(town,new ArrayList<>());
-        new File(getProvidingPlugin(TownyFlats.class).getDataFolder()+File.separator+"userdata"+File.separator+town.getName()+".yml");
+        if (putNewTown(town)) {
+            new File(getProvidingPlugin(TownyFlats.class).getDataFolder() + File.separator + "userdata" + File.separator + town.getName() + ".yml");
+        }
     }
     public static void putNew(TownBlock chunk) {
         try {
-        CFlats.put(chunk.getX()+""+chunk.getZ()+chunk.getWorld().getName(),new ArrayList<>());
-        File userfile = new File(getProvidingPlugin(TownyFlats.class).getDataFolder()+File.separator+"userdata"+File.separator+chunk.getTown().getName()+".yml");
-        FileConfiguration userconfig = YamlConfiguration.loadConfiguration(userfile);
-        userconfig.set("saved."+chunk.getX()+""+chunk.getZ()+chunk.getWorld().getName(),"1");
-        userconfig.save(userfile);
+            if(putNewChunk(chunk.getX()+""+chunk.getZ()+chunk.getWorld().getName())) {
+                File userfile = new File(getProvidingPlugin(TownyFlats.class).getDataFolder() + File.separator + "userdata" + File.separator + chunk.getTown().getName() + ".yml");
+                FileConfiguration userconfig = YamlConfiguration.loadConfiguration(userfile);
+                userconfig.set("saved." + chunk.getX() + "" + chunk.getZ() + chunk.getWorld().getName(), "1");
+                userconfig.save(userfile);
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-    public static void putNewTown(Town town){
+    public static boolean putNewTown(Town town){
         if (!TFlats.containsKey(town)) {
             TFlats.put(town, new ArrayList<>());
+            return true;
         }
+        return  false;
     }
-    public static void putNewChunk(String s){
+    public static boolean putNewChunk(String s){
         if (!CFlats.containsKey(s)) {
             CFlats.put(s, new ArrayList<>());
+            return true;
         }
+        return  false;
     }
     public static Apartment GetApartmentOrNull(Player pl){
         for (Apartment apartment:FlatManager.getApartments(pl.getLocation().getChunk())) {

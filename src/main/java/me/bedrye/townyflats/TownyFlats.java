@@ -1,6 +1,8 @@
 package me.bedrye.townyflats;
 
 import com.palmergames.bukkit.towny.TownyUniverse;
+import com.palmergames.bukkit.towny.object.Town;
+import com.palmergames.bukkit.towny.object.TownBlock;
 import me.bedrye.townyflats.commands.MainCommands;
 import me.bedrye.townyflats.commands.MainCommandsTabComp;
 import me.bedrye.townyflats.events.FlatsEventManager;
@@ -122,6 +124,13 @@ public final class TownyFlats extends JavaPlugin {
                 });
                 FlatManager.putNewTown(TownyUniverse.getInstance().getTown(file.getName().replace(".yml", "")));
             }
+        }
+        for (Town t:TownyUniverse.getInstance().getTowns()) {
+            FlatManager.putNew(t);
+            for (TownBlock b:t.getTownBlocks()){
+                FlatManager.putNew(b);
+            }
+
         }
 
     }

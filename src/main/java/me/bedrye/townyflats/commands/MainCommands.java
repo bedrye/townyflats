@@ -56,6 +56,10 @@ public class MainCommands implements CommandExecutor {
                                 Claim(res, args[1]);
                             }
                         }
+                        else {
+
+                            pl.sendMessage(tapp + "/tapp claim NAME");
+                        }
                         break;
                     case "delete":
                         if (pl.hasPermission("townyapartments.player.delete")|| Objects.requireNonNull(res).isMayor()) {
