@@ -233,7 +233,7 @@ public class Apartment {
         }
     }
     public void WriteToMaps(){
-        FlatManager.addApartment(this);
+        FlatManager.Instance().addApartment(this);
     }
     /*void Deletion(){
         new File(tf.getDataFolder()+File.separator+"userdata"+File.separator+town.getName()+".yml").delete();
@@ -255,7 +255,7 @@ public class Apartment {
 
     }
     public void RemoveFromMaps(){
-        FlatManager.removeApartment(this);
+        FlatManager.Instance().removeApartment(this);
     }
     public void HologramInfo(Player pl) {
         new BukkitRunnable() {

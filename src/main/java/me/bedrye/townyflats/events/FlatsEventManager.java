@@ -57,7 +57,7 @@ public class FlatsEventManager implements Listener {
         Player pl = event.getPlayer();
         if (!TownyAPI.getInstance().isWilderness(block.getLocation())) {
             Resident res = TownyUniverse.getInstance().getResident(pl.getName());
-            Apartment apartment = FlatManager.GetApartmentOrNull(block.getLocation());
+            Apartment apartment = FlatManager.Instance().GetApartmentOrNull(block.getLocation());
             if (apartment != null) {
                 if (apartment.IsAllowedToUse(res)) {
                     event.setCancelled(false);
@@ -80,25 +80,25 @@ public class FlatsEventManager implements Listener {
                         town = Objects.requireNonNull(TownyAPI.getInstance().getTownBlock(selectedBl1.getLocation())).getTownOrNull();
                         assert town != null;
                         if (town.hasResident(res)) {
-                            if (FlatManager.hasPlayerCoolDown(pl.getUniqueId())) {
+                            if (FlatManager.Instance().hasPlayerCoolDown(pl.getUniqueId())) {
                                 pl.sendMessage(TownyFlats.getLang().tapp + TownyFlats.getLang().command_antispam);
                                 event.setCancelled(true);
                                 return;
 
                             }
-                            FlatManager.addPlayerCoolDown(pl.getUniqueId());
+                            FlatManager.Instance().addPlayerCoolDown(pl.getUniqueId());
                             Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(TownyFlats.getProvidingPlugin(TownyFlats.class),
                             new Runnable() {
                                 public void run() {
-                                    FlatManager.removePlayerCoolDown(pl.getUniqueId());
+                                    FlatManager.Instance().removePlayerCoolDown(pl.getUniqueId());
                                 }
                             }, 20L);
-                            Apartment apartment = FlatManager.GetApartmentOrNull(selectedBl1.getLocation());
+                            Apartment apartment = FlatManager.Instance().GetApartmentOrNull(selectedBl1.getLocation());
                             if (apartment!=null){
                                 pl.sendMessage(TownyFlats.getLang().tapp + TownyFlats.getLang().already_apartment_here);
                                 }
                             else {
-                                FlatManager.ClaimApartment(pl, selectedBl1, event.getAction() != Action.RIGHT_CLICK_BLOCK, selectedBl1.getLocation());
+                                FlatManager.Instance().ClaimApartment(pl, selectedBl1, event.getAction() != Action.RIGHT_CLICK_BLOCK, selectedBl1.getLocation());
                                 }
                             }
                         }
@@ -111,16 +111,16 @@ public class FlatsEventManager implements Listener {
 
     @EventHandler
     public void plTownLeave(TownLeaveEvent event){
-        if (FlatManager.hasTemporary(event.getResident().getPlayer().getName())) {
-            FlatManager.removeTemporary(event.getResident().getPlayer().getName());
+        if (FlatManager.Instance().hasTemporary(event.getResident().getPlayer().getName())) {
+            FlatManager.Instance().removeTemporary(event.getResident().getPlayer().getName());
             //townyflats.cacheCh.remove(event.getPlayer().getUniqueId().toString());
         }
 
     }
     @EventHandler
     public void playerLeave(PlayerQuitEvent event) {
-        if (FlatManager.hasTemporary(event.getPlayer().getName())) {
-            FlatManager.removeTemporary(event.getPlayer().getName());
+        if (FlatManager.Instance().hasTemporary(event.getPlayer().getName())) {
+            FlatManager.Instance().removeTemporary(event.getPlayer().getName());
             //townyflats.cacheCh.remove(event.getPlayer().getUniqueId().toString());
         }
     }
@@ -130,7 +130,7 @@ public class FlatsEventManager implements Listener {
             Player pl = e.getPlayer();
             Town town = Objects.requireNonNull(TownyAPI.getInstance().getTownBlock(e.getRightClicked().getLocation())).getTownOrNull();
             assert town != null:"Town is null!";
-                for (Apartment ap: FlatManager.getApartments(town) ){
+                for (Apartment ap: FlatManager.Instance().getApartments(town) ){
                     ap.BuyWithHologram((ArmorStand) e.getRightClicked(),TownyUniverse.getInstance().getResident(pl.getUniqueId()));
                     }
         }
@@ -139,7 +139,7 @@ public class FlatsEventManager implements Listener {
     @EventHandler
     public void onUnclaimChunk(TownPreUnclaimEvent pos1) {
         Bukkit.getConsoleSender().sendMessage("Delete");
-        List<Apartment> l = new ArrayList<>(FlatManager.getApartments(pos1.getTownBlock()));
+        List<Apartment> l = new ArrayList<>(FlatManager.Instance().getApartments(pos1.getTownBlock()));
         for (Apartment ap: l ) {
             ap.RemoveHologram();
             ap.DeleteFile();
@@ -148,14 +148,14 @@ public class FlatsEventManager implements Listener {
     }
     @EventHandler
     public void onTownCreate(NewTownEvent event) throws TownyException {
-        FlatManager.putNew(event.getTown());
-        FlatManager.putNew( event.getTown().getHomeBlock());
+        FlatManager.Instance().putNew(event.getTown());
+        FlatManager.Instance().putNew( event.getTown().getHomeBlock());
     }
 
     @EventHandler
     public void onClaimCreate(TownClaimEvent event){
         Bukkit.getConsoleSender().sendMessage(event.getTownBlock().toString());
-        FlatManager.putNew( event.getTownBlock());
+        FlatManager.Instance().putNew( event.getTownBlock());
 
 
 

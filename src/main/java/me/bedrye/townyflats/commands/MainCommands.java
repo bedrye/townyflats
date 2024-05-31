@@ -34,15 +34,15 @@ public class MainCommands implements CommandExecutor {
         if (label.equalsIgnoreCase("tapp")) {
             if (sender instanceof Player) {
                 Player pl = (Player) sender;
-                if (FlatManager.hasPlayerCoolDown(pl.getUniqueId())) {
+                if (FlatManager.Instance().hasPlayerCoolDown(pl.getUniqueId())) {
                     pl.sendMessage(tapp + TownyFlats.getLang().command_antispam);
                     return true;
 
                 }
-                FlatManager.addPlayerCoolDown(pl.getUniqueId());
+                FlatManager.Instance().addPlayerCoolDown(pl.getUniqueId());
                 Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(townyflats, new Runnable() {
                     public void run() {
-                        FlatManager.removePlayerCoolDown(pl.getUniqueId());
+                        FlatManager.Instance().removePlayerCoolDown(pl.getUniqueId());
                     }
                 }, 20L);
                 Resident res = TownyUniverse.getInstance().getResident(pl.getUniqueId());
@@ -131,7 +131,7 @@ public class MainCommands implements CommandExecutor {
                     case "reload":
                         if (pl.hasPermission("townyapartments.admin.reload")){
                             pl.sendMessage("Reloading...");
-                            FlatManager.save();
+                            FlatManager.Instance().save();
                             townyflats.load();
                             townyflats.restart();
                             pl.sendMessage("Done!");
@@ -153,22 +153,22 @@ public class MainCommands implements CommandExecutor {
 
                 }
     }else{
-                    pl.sendMessage(tapp + "§2/tapp claim NAME§f - "+"claims plot if there are 2 positions set;"+"\n " +
-                            "§2/tapp delete§f - "+"deletes the plot on which you are currently standing; "+"\n " +
-                            "§2/tapp sell COST§f - "+"put the plot for sale;\n" +
-                            "§2/tapp buy§f - "+"buys the plot on which you are currently standing; "+"\n "  +
-                            "§2/tapp info§f - "+"see the info of the plot on which you are currently standing;" +"\n " +
-                            "§2/tapp list§f - "+"see the list of properties you own;"+"\n " +
-                            "§2/tapp add PLAYER§f - "+"add a player to the plot on which you are currently standing;" +"\n " +
-                            "§2/tapp remove PLAYER§f - "+"remove a player from the plot on which you are currently standing;" +"\n " +
-                            "§2/tapp reload§f - "+"Reloads the config");
+                    pl.sendMessage(tapp + "§2/tapp claim NAME§f - "+TownyFlats.getLang().help_claim+"\n " +
+                            "§2/tapp delete§f - "+TownyFlats.getLang().help_delete+"\n " +
+                            "§2/tapp sell COST§f - "+TownyFlats.getLang().help_sell+"\n " +
+                            "§2/tapp buy§f - "+TownyFlats.getLang().help_buy+"\n "  +
+                            "§2/tapp info§f - "+ TownyFlats.getLang().help_info+"\n " +
+                            "§2/tapp list§f - "+TownyFlats.getLang().help_list+"\n " +
+                            "§2/tapp add PLAYER§f - "+TownyFlats.getLang().help_player_add +"\n " +
+                            "§2/tapp remove PLAYER§f - "+TownyFlats.getLang().help_player_remove +"\n " +
+                            "§2/tapp reload§f - "+TownyFlats.getLang().help_reload);
                 }
             }
         }
         return true;
     }
     private void AddResident(Resident pl,String arg){
-        Apartment apartment =  FlatManager.GetApartmentOrNull(pl.getPlayer());
+        Apartment apartment =  FlatManager.Instance().GetApartmentOrNull(pl.getPlayer());
         if (apartment!=null) {
             if (apartment.IsAllowedToAdminister(pl)) {
                 Resident resident = TownyUniverse.getInstance().getResident(arg);
@@ -181,7 +181,7 @@ public class MainCommands implements CommandExecutor {
 
     }
     private void RemoveResident(Resident pl,String arg){
-        Apartment apartment =  FlatManager.GetApartmentOrNull(pl.getPlayer());
+        Apartment apartment =  FlatManager.Instance().GetApartmentOrNull(pl.getPlayer());
             if (apartment!=null) {
                 if (apartment.IsAllowedToAdminister(pl)) {
                     Resident resident = TownyUniverse.getInstance().getResident(arg);
@@ -196,7 +196,7 @@ public class MainCommands implements CommandExecutor {
         pl.sendMessage(tapp + TownyFlats.getLang().command_list);
         pl.sendMessage("");
         int i = 0;
-        for (Apartment ap:FlatManager.getApartments(t)) {
+        for (Apartment ap:FlatManager.Instance().getApartments(t)) {
 
                 if (i >= (num * 5) - 5) {
                     if (i < num * 5) {
@@ -244,7 +244,7 @@ public class MainCommands implements CommandExecutor {
         pl.sendMessage(tapp + TownyFlats.getLang().command_list);
         pl.sendMessage("");
         int i=0;
-        for (Apartment ap:FlatManager.getApartments(pl.getLocation().getChunk())) {
+        for (Apartment ap:FlatManager.Instance().getApartments(pl.getLocation().getChunk())) {
             if (i >= (num * 5) - 5) {
                 if (i < num * 5) {
                         TextComponent message = new TextComponent((i + 1) + "." + ap.getName());
@@ -288,24 +288,24 @@ public class MainCommands implements CommandExecutor {
     }
 
     private void Claim(Resident res,String id){
-        if (FlatManager.hasTemporary(res.getPlayer().getName())) {
-            if (FlatManager.getTemporary(res.getPlayer().getName()).hasTwoLocations()) {
+        if (FlatManager.Instance().hasTemporary(res.getPlayer().getName())) {
+            if (FlatManager.Instance().getTemporary(res.getPlayer().getName()).hasTwoLocations()) {
                 if (ChunkLimitTester(res.getPlayer())){
-                    Apartment loc =new Apartment(FlatManager.getTemporary(res.getPlayer().getName()),-1,res,id,res.getTownOrNull());
+                    Apartment loc =new Apartment(FlatManager.Instance().getTemporary(res.getPlayer().getName()),-1,res,id,res.getTownOrNull());
                     loc.WriteToMaps();
                     res.getPlayer().sendMessage(tapp+ TownyFlats.getLang().command_claim_true);
                     loc.SaveFile();
 
                 }
             }
-            FlatManager.removeTemporary(res.getPlayer().getName());
+            FlatManager.Instance().removeTemporary(res.getPlayer().getName());
             }
 
         }
 
     private void Buy(Player pl){
         if (!TownyAPI.getInstance().isWilderness(pl.getLocation())) {
-            Apartment apartment = FlatManager.GetApartmentOrNull(pl);
+            Apartment apartment = FlatManager.Instance().GetApartmentOrNull(pl);
             if (apartment!=null) {
                 Resident resident = TownyUniverse.getInstance().getResident(pl.getName());
                 if(!apartment.BuyPlot(resident)){
@@ -318,7 +318,7 @@ public class MainCommands implements CommandExecutor {
     }
     private void Sell(Resident pl,String price){
         if (!TownyAPI.getInstance().isWilderness(pl.getPlayer().getLocation())) {
-            Apartment apartment =  FlatManager.GetApartmentOrNull(pl.getPlayer());
+            Apartment apartment =  FlatManager.Instance().GetApartmentOrNull(pl.getPlayer());
                 if (apartment!=null) {
                    if(apartment.IsAllowedToAdminister(pl)){
                     apartment.SetForSale(Integer.parseInt(price),pl.getPlayer().getLocation());
@@ -333,7 +333,7 @@ public class MainCommands implements CommandExecutor {
     }
     private void Delete(Player pl){
         if (!TownyAPI.getInstance().isWilderness(pl.getLocation())) {
-            Apartment apartment =  FlatManager.GetApartmentOrNull(pl.getLocation());
+            Apartment apartment =  FlatManager.Instance().GetApartmentOrNull(pl.getLocation());
             if (apartment!=null) {
                 if(apartment.getTown().hasResident(pl)) {
                     apartment.RemoveHologram();
@@ -347,7 +347,7 @@ public class MainCommands implements CommandExecutor {
         pl.sendMessage(tapp+ TownyFlats.getLang().command_delete_nothing);
         }
     private void infoName(Resident res,String ID){
-         for(Apartment ap : FlatManager.getApartments(res.getTownOrNull())){
+         for(Apartment ap : FlatManager.Instance().getApartments(res.getTownOrNull())){
              if(ap.getID().equals(ID)){
                  ap.InfoCommand(res.getPlayer());
                  break;
@@ -356,7 +356,7 @@ public class MainCommands implements CommandExecutor {
     }
     private void info(Player pl) {
         if (!TownyAPI.getInstance().isWilderness(pl.getLocation())) {
-                Apartment apartment =  FlatManager.GetApartmentOrNull(pl);
+                Apartment apartment =  FlatManager.Instance().GetApartmentOrNull(pl);
                 if (apartment!=null) {
                     apartment.InfoCommand(pl);
                     apartment.HologramInfo(pl);
@@ -370,7 +370,7 @@ public class MainCommands implements CommandExecutor {
 
     private boolean ChunkLimitTester(Player pl) {
         Bukkit.getConsoleSender().sendMessage(pl.toString());
-        if (FlatManager.getApartments(pl.getLocation().getChunk()).size() == townyflats.flatlim) {
+        if (FlatManager.Instance().getApartments(pl.getLocation().getChunk()).size() == townyflats.flatlim) {
             pl.sendMessage(tapp + TownyFlats.getLang().command_limit_reached);
             return false;
         }

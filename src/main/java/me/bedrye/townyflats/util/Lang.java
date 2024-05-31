@@ -30,7 +30,7 @@ public class Lang {
     public final String hologram_1;
     public final String hologram_4;
     public final String already_apartment_here;
-    public final String clear_pos, money_symbol;
+    public final String clear_pos, money_symbol,help_claim,help_delete,help_sell,help_buy,help_info,help_list,help_player_remove,help_player_add,help_reload;
 
     public Lang(){
         tapp = "§L§0[§4TAPP§L§0]§f";
@@ -60,6 +60,15 @@ public class Lang {
         already_apartment_here = Objects.requireNonNull(TownyFlats.getInstance().getConfig().get("already_apartment_here")).toString();
         clear_pos = Objects.requireNonNull(TownyFlats.getInstance().getConfig().get("clear_pos")).toString();
         money_symbol = Objects.requireNonNull(TownyFlats.getInstance().getConfig().get("money_symbol")).toString();
+        help_buy = Objects.requireNonNull(TownyFlats.getInstance().getConfig().get("help_buy")).toString();
+        help_claim = Objects.requireNonNull(TownyFlats.getInstance().getConfig().get("help_claim")).toString();
+        help_sell = Objects.requireNonNull(TownyFlats.getInstance().getConfig().get("help_sell")).toString();
+        help_delete = Objects.requireNonNull(TownyFlats.getInstance().getConfig().get("help_delete")).toString();
+        help_player_remove = Objects.requireNonNull(TownyFlats.getInstance().getConfig().get("help_player_remove")).toString();
+        help_list = Objects.requireNonNull(TownyFlats.getInstance().getConfig().get("help_list")).toString();
+        help_info= Objects.requireNonNull(TownyFlats.getInstance().getConfig().get("help_info")).toString();
+        help_reload = Objects.requireNonNull(TownyFlats.getInstance().getConfig().get("help_reload")).toString();
+        help_player_add = Objects.requireNonNull(TownyFlats.getInstance().getConfig().get("help_player_add")).toString();
     }
 
 

@@ -72,7 +72,7 @@ public final class TownyFlats extends JavaPlugin {
     @Override
     public void onDisable() {
         Bukkit.getConsoleSender().sendMessage("[TAPP] - Saving... !");
-        FlatManager.save();
+        FlatManager.Instance().save();
         Bukkit.getConsoleSender().sendMessage("[TAPP] - Disabled !");
     }
 
@@ -81,54 +81,58 @@ public final class TownyFlats extends JavaPlugin {
             for (File file : Objects.requireNonNull(new File(this.getDataFolder().getAbsolutePath() + File.separator + "userdata").listFiles())) {
                 FileConfiguration conf = YamlConfiguration.loadConfiguration(file);
                 Bukkit.getConsoleSender().sendMessage(file.getName().replace(".yml", ""));
-                Objects.requireNonNull(conf.getConfigurationSection("saved")).getKeys(false).forEach(key -> {
-                    if (!conf.get("saved." + key).toString().equals("1")) {
-                   Objects.requireNonNull(conf.getConfigurationSection("saved." + key)).getKeys(false).forEach(key2 -> {
+                if( !conf.contains("saved")) continue;
+                conf.getConfigurationSection("saved").getKeys(false).forEach(key -> {
+                    if (conf.get("saved." + key) != null) {
+                        if (!conf.get("saved." + key).toString().equals("1")) {
+                            conf.getConfigurationSection("saved." + key).getKeys(false).forEach(key2 -> {
+                                Apartment cacheT = new Apartment(
+                                        conf.getInt("saved." + key + "." + key2 + ".x1"),
+                                        conf.getInt("saved." + key + "." + key2 + ".x2"),
+                                        conf.getInt("saved." + key + "." + key2 + ".y1"),
+                                        conf.getInt("saved." + key + "." + key2 + ".y2"),
+                                        conf.getInt("saved." + key + "." + key2 + ".z1"),
+                                        conf.getInt("saved." + key + "." + key2 + ".z2"),
+                                        conf.getInt("saved." + key + "." + key2 + ".xC"),
+                                        conf.getInt("saved." + key + "." + key2 + ".zC"),
+                                        conf.getInt("saved." + key + "." + key2 + ".price"),
 
-                    Apartment cacheT = new Apartment(Integer.parseInt(Objects.requireNonNull(conf.get("saved." + key  + "."+key2+ ".x1")).toString()),
-                            Integer.parseInt(Objects.requireNonNull(conf.get("saved." + key + "."+key2+".x2")).toString()),
-                            Integer.parseInt(Objects.requireNonNull(conf.get("saved." + key + "."+key2+ ".y1")).toString()),
-                            Integer.parseInt(Objects.requireNonNull(conf.get("saved." + key + "."+key2+ ".y2")).toString()),
-                            Integer.parseInt(Objects.requireNonNull(conf.get("saved." + key + "."+key2+ ".z1")).toString()),
-                            Integer.parseInt(Objects.requireNonNull(conf.get("saved." + key + "."+key2+ ".z2")).toString()),
-                            Integer.parseInt(Objects.requireNonNull(conf.get("saved." + key + "."+key2+ ".xC")).toString()),
-                            Integer.parseInt(Objects.requireNonNull(conf.get("saved." + key + "."+key2+ ".zC")).toString()),
-                            Integer.parseInt(Objects.requireNonNull(conf.get("saved." + key + "."+key2+ ".price")).toString()),
+                                        TownyUniverse.getInstance().getResident(Objects.requireNonNull(conf.get("saved." + key + "." + key2 + ".owner")).toString()),
+                                        Objects.requireNonNull(conf.get("saved." + key + "." + key2 + ".world")).toString(),
+                                        Objects.requireNonNull(conf.get("saved." + key + "." + key2 + ".name")).toString(),
+                                        TownyUniverse.getInstance().getTown(file.getName().replace(".yml", ""))
+                                );
+                                if (conf.contains("saved." + key + ".xA") && conf.contains("saved." + key + "." + key2 + ".yA") && conf.contains("saved." + key + ".zA")) {
+                                    Location loc = new Location(Bukkit.getWorld(Objects.requireNonNull(conf.get("saved." + key + "." + key2 + ".world")).toString()),
+                                            Integer.parseInt(Objects.requireNonNull(conf.get("saved." + key + "." + key2 + ".xA")).toString()),
+                                            Integer.parseInt(Objects.requireNonNull(conf.get("saved." + key + "." + key2 + ".yA")).toString()),
+                                            Integer.parseInt(Objects.requireNonNull(conf.get("saved." + key + "." + key2 + ".zA")).toString()));
+                                    if (cacheT.getPrice() >= 0) {
+                                        cacheT.SetHologram(loc);
+                                    }
+                                }
+                                if (conf.contains("saved." + key + "." + key2 + ".residents")) {
+                                    Objects.requireNonNull(conf.getConfigurationSection("saved." + key + "." + key2 + ".residents")).getKeys(false).forEach(subkey -> {
+                                        cacheT.addResident(TownyUniverse.getInstance().getResident(Objects.requireNonNull(conf.get("saved." + key + "." + key2 + ".residents." + subkey)).toString()));
 
-                            TownyUniverse.getInstance().getResident(Objects.requireNonNull(conf.get("saved." + key + "."+key2+ ".owner")).toString()),
-                            Objects.requireNonNull(conf.get("saved." + key + "."+key2+ ".world")).toString(),
-                            Objects.requireNonNull(conf.get("saved." + key + "."+key2+ ".name")).toString(),
-                            TownyUniverse.getInstance().getTown(file.getName().replace(".yml", ""))
-                            );
-                    if (conf.contains("saved." + key + ".xA") && conf.contains("saved." + key + "."+key2+ ".yA") && conf.contains("saved." + key + ".zA")) {
-                        Location loc = new Location(Bukkit.getWorld(Objects.requireNonNull(conf.get("saved." + key + "."+key2+ ".world")).toString()),
-                                Integer.parseInt(Objects.requireNonNull(conf.get("saved." + key + "."+key2+ ".xA")).toString()),
-                                Integer.parseInt(Objects.requireNonNull(conf.get("saved." + key + "."+key2+ ".yA")).toString()),
-                                Integer.parseInt(Objects.requireNonNull(conf.get("saved." + key + "."+key2+ ".zA")).toString()));
-                        if (cacheT.getPrice()>= 0) {
-                            cacheT.SetHologram(loc);
+                                    });
+                                }
+                                cacheT.WriteToMaps();
+                                FlatManager.Instance().putNewChunk(key);
+                                Bukkit.getConsoleSender().sendMessage(key);
+                            });
+                        } else {
+                            FlatManager.Instance().putNewChunk(key);
                         }
                     }
-                    if (conf.contains("saved." + key + "."+key2+ ".residents")) {
-                        Objects.requireNonNull(conf.getConfigurationSection("saved." + key + "."+key2+ ".residents")).getKeys(false).forEach(subkey -> {
-                                cacheT.addResident(TownyUniverse.getInstance().getResident(Objects.requireNonNull(conf.get("saved." + key+ "."+key2+ ".residents." + subkey)).toString()));
-
-                        });
-                    }
-                    cacheT.WriteToMaps();
-                    FlatManager.putNewChunk(key);
-                    Bukkit.getConsoleSender().sendMessage(key);
-                });} else {
-                FlatManager.putNewChunk(key);
-                        }
                 });
-                FlatManager.putNewTown(TownyUniverse.getInstance().getTown(file.getName().replace(".yml", "")));
+                FlatManager.Instance().putNewTown(TownyUniverse.getInstance().getTown(file.getName().replace(".yml", "")));
             }
         }
         for (Town t:TownyUniverse.getInstance().getTowns()) {
-            FlatManager.putNew(t);
+            FlatManager.Instance().putNew(t);
             for (TownBlock b:t.getTownBlocks()){
-                FlatManager.putNew(b);
+                FlatManager.Instance().putNew(b);
             }
 
         }
