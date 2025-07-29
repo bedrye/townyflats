@@ -18,7 +18,6 @@
 <tr><td>/tapp reload </td><td> Reloads the plugin;</td> </tr>
 </table>
 
-<img width="1919" height="976" alt="Screenshot 2025-07-29 135749" src="https://github.com/user-attachments/assets/51d42e4d-9158-4285-b076-6b4f4f076c9e" />
 
 <h3>Permissions</h3>
 <ul>
