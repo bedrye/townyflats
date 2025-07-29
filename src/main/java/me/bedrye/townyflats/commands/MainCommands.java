@@ -132,8 +132,8 @@ public class MainCommands implements CommandExecutor {
                         if (pl.hasPermission("townyapartments.admin.reload")){
                             pl.sendMessage("Reloading...");
                             FlatManager.Instance().save();
-                            townyflats.load();
                             townyflats.restart();
+                            townyflats.load();
                             pl.sendMessage("Done!");
                     }
                         break;

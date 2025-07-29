@@ -26,14 +26,14 @@ import static org.bukkit.plugin.java.JavaPlugin.getProvidingPlugin;
 
 public class Apartment {
     private final int x1,x2,y1,y2,z1,z2,xC,zC;
-    private int price, xA,zA;
-    private int yA = -100;
+    private int price;
+    //private int yA = -100;
     private Resident owner;
     private final String world,ID,name;
     private final Town town;
     private final ArrayList<Resident> residents = new ArrayList<>();
-    private boolean hasHologram =false;
-    private final ArmorStand[] entities = new ArmorStand[4] ;
+    //private boolean hasHologram =false;
+    private Hologram hologram ;
     public Location getLocation1(){
         return new Location(Bukkit.getServer().getWorld("world"),x1,y1,z1);
     }
@@ -46,6 +46,7 @@ public class Apartment {
     public Resident getOwner(){
         return owner;
     }
+    public boolean hasHologram(){return hologram!=null;}
     public String getChunkStringID(){
         return xC+""+zC+world;
 
@@ -53,6 +54,11 @@ public class Apartment {
 
     public int getPrice() {
         return price;
+    }
+    public String getForSalePrice(){
+
+        if(price>=0) return price+"";
+        return "NOT FOR SALE";
     }
 
     public String getID() {
@@ -165,29 +171,8 @@ public class Apartment {
                 && (z1 >= loc.getBlockZ() && z2 <= loc.getBlockZ()));
     }
     public void SetHologram(Location loc) {
-        hasHologram =true;
-        xA = loc.getBlockX();
-        zA = loc.getBlockZ();
-        yA = loc.getBlockY();
-        entities[0] = (ArmorStand) loc.getWorld().spawnEntity(loc.add(0, 0.3, 0), EntityType.ARMOR_STAND);
-        entities[1] = (ArmorStand) loc.getWorld().spawnEntity(loc.add(0, 0.25, 0), EntityType.ARMOR_STAND);
-        entities[2] = (ArmorStand) loc.getWorld().spawnEntity(loc.add(0, 0.25, 0), EntityType.ARMOR_STAND);
-        entities[3] = (ArmorStand) loc.getWorld().spawnEntity(loc.add(0, 0.40, 0), EntityType.ARMOR_STAND);
-        entities[3].setCustomName(TownyFlats.getLang().hologram_1);
-        entities[2].setCustomName(TownyFlats.getLang().command_info_owner+" §l" + owner);
-        entities[1].setCustomName(TownyFlats.getLang().command_info_sell+" §l" + price + TownyFlats.getLang().money_symbol);
-        entities[0].setCustomName(TownyFlats.getLang().hologram_4);
-        for (ArmorStand ent : entities) {
-            ent.setGravity(false);
-            ent.setCanPickupItems(false);
-            ent.setCustomNameVisible(true);
-            ent.setVisible(false);
-            ent.setSmall(true);
-            ent.setInvisible(true);
 
-        }
-
-        loc.getWorld().playEffect(loc, Effect.MOBSPAWNER_FLAMES, 2004);
+        if(TownyFlats.getInstance().HologramEnable) hologram = new Hologram(this,loc);
     }
     public void SaveFile(){
         File userfile = new File(getProvidingPlugin(TownyFlats.class).getDataFolder()+File.separator+"userdata"+File.separator+town.getName()+".yml");
@@ -204,10 +189,10 @@ public class Apartment {
         userconfig.set("saved."+getChunkStringID()+"."+ID+".price",price);
         userconfig.set("saved."+getChunkStringID()+"."+ID+".world",world);
         userconfig.set("saved."+getChunkStringID()+"."+ID+".name",name);
-        if (yA!=-100) {
-            userconfig.set("saved."+getChunkStringID()+"."+ID+".xA", xA);
-            userconfig.set("saved."+getChunkStringID()+"."+ID+".yA", yA);
-            userconfig.set("saved."+getChunkStringID()+"."+ID+".zA", zA);
+        if (hasHologram()) {
+            userconfig.set("saved."+getChunkStringID()+"."+ID+".xA", hologram.getX());
+            userconfig.set("saved."+getChunkStringID()+"."+ID+".yA", hologram.getY());
+            userconfig.set("saved."+getChunkStringID()+"."+ID+".zA", hologram.getZ());
         }
         int d =0;
         for (Resident pl:residents){
@@ -256,6 +241,7 @@ public class Apartment {
     }
     public void RemoveFromMaps(){
         FlatManager.Instance().removeApartment(this);
+
     }
     public void HologramInfo(Player pl) {
         new BukkitRunnable() {
@@ -297,7 +283,7 @@ public class Apartment {
                 );
         if (owner.getName().equals(pl.getName())) {
             TextComponent messagepr =new TextComponent(TownyFlats.getLang().command_info_sell);
-            TextComponent messagep =new TextComponent(price+" ;");
+            TextComponent messagep =new TextComponent(getForSalePrice()+"; ");
             messagep.setColor(ChatColor.WHITE);
             messagepr.setColor(ChatColor.DARK_GREEN);
             TextComponent messageAct =new TextComponent(TownyFlats.getLang().command_info_sell_button);
@@ -324,24 +310,16 @@ public class Apartment {
             pl.sendMessage("- "+st.getName());
     }
     }
-    public void RemoveHologram(){
-        if (hasHologram){
-            for (ArmorStand ent: entities) {
-                ent.remove();
-            }
-            hasHologram=false;
-            yA = -100;
-        }}
-    public void BuyWithHologram(ArmorStand e,Resident pl) {
-        for (ArmorStand ar : entities) {
-            if (ar == e) {
-                if (!BuyPlot(pl)){
-                    pl.getPlayer().sendMessage(TownyFlats.getLang().tapp + TownyFlats.getLang().command_sell_false);
-                }
-                return;
-            }
-
+    public void RemoveHologram() {
+        if(hasHologram()) {
+            hologram.RemoveHologram();
+            hologram = null;
         }
+
+    }
+    public void BuyWithHologram(ArmorStand e,Resident pl) {
+        if(hasHologram())
+            hologram.BuyWithHologram(e,pl);
     }
     public boolean CanBuyPlot(Resident res){
         return  res.getAccount().getHoldingBalance() >= price

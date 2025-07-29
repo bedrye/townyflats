@@ -76,17 +76,14 @@ public final class FlatManager {
     }
     public void removeApartment(Apartment ap){
         flats.remove(ap);
-        if(TFlats.get(ap.getTown()).size()==1){
-            TFlats.remove(ap.getTown());
+        TFlats.get(ap.getTown()).remove(ap);
+        CFlats.get(ap.getChunkStringID()).remove(ap);
+        if(TFlats.get(ap.getTown()).size()==0){
             File fl = new File(getProvidingPlugin(TownyFlats.class).getDataFolder()+File.separator+"userdata"+File.separator+ap.getTown().getName()+".yml");
             fl.delete();        }
-        else {
-            TFlats.get(ap.getTown()).remove(ap);
-        }
-        if(CFlats.get(ap.getChunkStringID()).size()==1) {
+
+        if(CFlats.get(ap.getChunkStringID()).size()==0) {
             CFlats.remove(ap.getChunkStringID());
-        }else {
-            CFlats.get(ap.getChunkStringID()).remove(ap);
         }
     }
 

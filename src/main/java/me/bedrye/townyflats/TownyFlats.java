@@ -21,8 +21,10 @@ public final class TownyFlats extends JavaPlugin {
     //public static Economy econ = null;
     public int flatlim;
     public static Material wand;
+    public boolean HologramEnable;
 
     private static Lang lang;
+
 
     public static Lang getLang(){
         return lang;
@@ -39,6 +41,7 @@ public final class TownyFlats extends JavaPlugin {
         // Plugin startup logic
         instance = this;
         lang = new Lang();
+        HologramEnable = Objects.requireNonNull(getConfig().getBoolean("HologramEnable"));
         load();
         restart();
         registerCommands();
@@ -66,7 +69,7 @@ public final class TownyFlats extends JavaPlugin {
 
         flatlim = getConfig().getInt("FlatLimitPerChunk");
         wand = Material.valueOf(Objects.requireNonNull(getConfig().get("WandItem")).toString());
-
+        HologramEnable = Objects.requireNonNull(getConfig().getBoolean("HologramEnable"));
     }
 
     @Override
@@ -102,7 +105,7 @@ public final class TownyFlats extends JavaPlugin {
                                         Objects.requireNonNull(conf.get("saved." + key + "." + key2 + ".name")).toString(),
                                         TownyUniverse.getInstance().getTown(file.getName().replace(".yml", ""))
                                 );
-                                if (conf.contains("saved." + key + ".xA") && conf.contains("saved." + key + "." + key2 + ".yA") && conf.contains("saved." + key + ".zA")) {
+                                if (conf.contains("saved." + key+ "."+ key2+ ".xA") && conf.contains("saved." + key+ "."+ key2+ ".yA") && conf.contains("saved." + key+ "."+ key2+ ".zA")) {
                                     Location loc = new Location(Bukkit.getWorld(Objects.requireNonNull(conf.get("saved." + key + "." + key2 + ".world")).toString()),
                                             Integer.parseInt(Objects.requireNonNull(conf.get("saved." + key + "." + key2 + ".xA")).toString()),
                                             Integer.parseInt(Objects.requireNonNull(conf.get("saved." + key + "." + key2 + ".yA")).toString()),

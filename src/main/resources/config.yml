@@ -1,5 +1,6 @@
 FlatLimitPerChunk: 40
 WandItem: STICK
+HologramEnable: true
 
 incorrect_command: " /tapp"
 command_claim_true: "§f You have claimed this property "
